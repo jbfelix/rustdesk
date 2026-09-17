@@ -11,3 +11,7 @@
   en entrant seulement ; liste blanche IP écartée par défaut (IP publique non garantie stable).
 - Reste ouvert : premier build de la branche sos ; réduire la matrice aux cibles utiles
   (macOS arm64, Windows x64) ; intégrer service + mot de passe permanent au déploiement.
+- Soir : client proches validé sur le Mac Studio (icône, nom, préréglage, connexion OK). Correctifs :
+  import log via hbb_common ; glob du renommage dmg ; préréglage entrant réservé aux proches,
+  l'opérateur reçoit la phrase en mot de passe sortant par défaut. Champs Réseau vides = normal
+  (surcharge « serveur personnalisé », les valeurs gravées s'appliquent).

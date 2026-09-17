@@ -27,13 +27,26 @@ pub fn apply() {
             .insert("conn-type".to_owned(), "incoming".to_owned());
     }
 
-    // Mot de passe permanent préréglé, posé une seule fois si aucun n'existe encore.
-    if !PRESET_PASSWORD.is_empty() && !is_placeholder(PRESET_PASSWORD) {
+    if PRESET_PASSWORD.is_empty() || is_placeholder(PRESET_PASSWORD) {
+        return;
+    }
+
+    if INCOMING_ONLY == "Y" {
+        // Client des proches : mot de passe permanent préréglé, posé une seule fois
+        // si aucun n'existe encore (modifiable ensuite dans Sécurité).
         let (stored, _) = Config::get_local_permanent_password_storage_and_salt();
         if stored.is_empty() {
             if !Config::set_permanent_password(PRESET_PASSWORD) {
                 log::error!("SOS: impossible de poser le mot de passe permanent préréglé");
             }
         }
+    } else {
+        // Client opérateur : la phrase sert de mot de passe de connexion sortante par
+        // défaut (option amont « default-connect-password »), essayée avant de demander.
+        // Son propre mot de passe entrant reste à fixer par l'opérateur dans Sécurité.
+        config::BUILTIN_SETTINGS
+            .write()
+            .unwrap()
+            .insert("default-connect-password".to_owned(), PRESET_PASSWORD.to_owned());
     }
 }
