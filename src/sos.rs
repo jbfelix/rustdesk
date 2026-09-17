@@ -2,7 +2,7 @@
 //! Les deux constantes ci-dessous sont remplacées par le workflow avant compilation ;
 //! laissées telles quelles (build local), rien n'est appliqué.
 
-use hbb_common::config::{self, Config};
+use hbb_common::{config::{self, Config}, log};
 
 pub const PRESET_PASSWORD: &str = "__SOS_PRESET_PASSWORD__";
 pub const INCOMING_ONLY: &str = "__SOS_INCOMING_ONLY__";
