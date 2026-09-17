@@ -9,6 +9,9 @@ on:
       upload-tag:
         type: string
         default: "nightly"
+      sos-incoming-only:
+        type: boolean
+        default: true
 
 # NOTE: F-Droid builder script 'flutter/build_fdroid.sh' reads environment
 # variables from this workflow!
@@ -51,6 +54,9 @@ env:
   ANDROID_SIGNING_KEY: "${{ secrets.ANDROID_SIGNING_KEY }}"
   MACOS_P12_BASE64: "${{ secrets.MACOS_P12_BASE64 }}"
   UPLOAD_ARTIFACT: "${{ inputs.upload-artifact }}"
+  SOS_INCOMING_ONLY: "${{ inputs.sos-incoming-only && 'Y' || 'N' }}"
+  SOS_PRESET_PASSWORD: "${{ secrets.SOS_PRESET_PASSWORD }}"
+  SOS_ROLE: "${{ inputs.sos-incoming-only && 'proches' || 'operateur' }}"
   SIGN_BASE_URL: "${{ secrets.SIGN_BASE_URL }}-2"
 
 jobs:
@@ -146,6 +152,27 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           submodules: recursive
+
+      - name: SOS — graver serveur, clé et nom dans hbb_common
+        shell: bash
+        run: |
+          f=libs/hbb_common/src/config.rs
+          sed -i.bak \
+            -e 's#RwLock::new("RustDesk".to_owned())#RwLock::new("SOS".to_owned())#' \
+            -e 's#&\["rs-ny.rustdesk.com"\]#\&["remote.jbfelix.be"]#' \
+            -e 's#OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=#x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=#' "$f"
+          rm -f "$f.bak"
+          grep -n 'APP_NAME: RwLock\|RENDEZVOUS_SERVERS: &\|pub const RS_PUB_KEY' "$f"
+          grep -q '"SOS".to_owned' "$f" && grep -q 'remote.jbfelix.be' "$f" && grep -q 'x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=' "$f"
+          python3 - <<'PY'
+          import os
+          p='src/sos.rs'; s=open(p, encoding='utf-8').read()
+          pw=os.environ.get('SOS_PRESET_PASSWORD','').replace('\\','\\\\').replace('"','\\"')
+          s=s.replace('__SOS_PRESET_PASSWORD__', pw).replace('__SOS_INCOMING_ONLY__', os.environ.get('SOS_INCOMING_ONLY','N'))
+          open(p,'w', encoding='utf-8').write(s)
+          print('sos.rs: entrant seulement =', os.environ.get('SOS_INCOMING_ONLY'), '; mot de passe prérégle =', 'oui' if pw else 'non')
+          PY
+
 
       - name: Restore bridge files
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -350,7 +377,7 @@ jobs:
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: rustdesk-unsigned-windows-${{ matrix.job.arch }}
+          name: sos-windows-${{ matrix.job.arch }}-${{ env.SOS_ROLE }}
           path: rustdesk
 
       - name: Sign rustdesk files
@@ -779,6 +806,27 @@ jobs:
         with:
           submodules: recursive
 
+      - name: SOS — graver serveur, clé et nom dans hbb_common
+        shell: bash
+        run: |
+          f=libs/hbb_common/src/config.rs
+          sed -i.bak \
+            -e 's#RwLock::new("RustDesk".to_owned())#RwLock::new("SOS".to_owned())#' \
+            -e 's#&\["rs-ny.rustdesk.com"\]#\&["remote.jbfelix.be"]#' \
+            -e 's#OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=#x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=#' "$f"
+          rm -f "$f.bak"
+          grep -n 'APP_NAME: RwLock\|RENDEZVOUS_SERVERS: &\|pub const RS_PUB_KEY' "$f"
+          grep -q '"SOS".to_owned' "$f" && grep -q 'remote.jbfelix.be' "$f" && grep -q 'x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=' "$f"
+          python3 - <<'PY'
+          import os
+          p='src/sos.rs'; s=open(p, encoding='utf-8').read()
+          pw=os.environ.get('SOS_PRESET_PASSWORD','').replace('\\','\\\\').replace('"','\\"')
+          s=s.replace('__SOS_PRESET_PASSWORD__', pw).replace('__SOS_INCOMING_ONLY__', os.environ.get('SOS_INCOMING_ONLY','N'))
+          open(p,'w', encoding='utf-8').write(s)
+          print('sos.rs: entrant seulement =', os.environ.get('SOS_INCOMING_ONLY'), '; mot de passe prérégle =', 'oui' if pw else 'non')
+          PY
+
+
       - name: Import the codesign cert
         if: env.MACOS_P12_BASE64 != null
         uses: apple-actions/import-codesign-certs@253ddeeac23f2bdad1646faac5c8c2832e800071 # v1
@@ -914,20 +962,28 @@ jobs:
           fi
           ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
 
+      - name: SOS — signature ad hoc du bundle (pas de certificat Apple)
+        if: env.MACOS_P12_BASE64 == null
+        run: |
+          APP=./flutter/build/macos/Build/Products/Release/SOS.app
+          test -d "$APP"
+          codesign --force --deep --sign - "$APP"
+          codesign --verify --deep --strict "$APP"
+
       - name: create unsigned dmg
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           CREATE_DMG="$(command -v create-dmg)"
           CREATE_DMG="$(readlink -f "$CREATE_DMG")"
           sed -i -e 's/MAXIMUM_UNMOUNTING_ATTEMPTS=3/MAXIMUM_UNMOUNTING_ATTEMPTS=7/' "$CREATE_DMG"
-          create-dmg --icon "RustDesk.app" 200 190 --hide-extension "RustDesk.app" --window-size 800 400 --app-drop-link 600 185 rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg ./flutter/build/macos/Build/Products/Release/RustDesk.app
+          create-dmg --icon "SOS.app" 200 190 --hide-extension "SOS.app" --window-size 800 400 --app-drop-link 600 185 sos-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg ./flutter/build/macos/Build/Products/Release/SOS.app
 
       - name: Upload unsigned macOS app
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: rustdesk-unsigned-macos-${{ matrix.job.arch }}
-          path: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg # can not upload the directory directly or tar.gz, which destroy the link structure, causing the codesign failed
+          name: sos-macos-${{ matrix.job.arch }}-${{ env.SOS_ROLE }}
+          path: sos-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg # can not upload the directory directly or tar.gz, which destroy the link structure, causing the codesign failed
 
       - name: Codesign app and create signed dmg
         if: env.MACOS_P12_BASE64 != null && env.UPLOAD_ARTIFACT == 'true'
