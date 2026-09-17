@@ -35,7 +35,9 @@ Projet personnel de JB. Fork de rustdesk/rustdesk (AGPL), branche `sos`.
 - Entrée de workflow `sos-incoming-only` (défaut : vrai) → client des proches sans partie
   « contrôler » (HARD_SETTINGS conn-type=incoming). Décocher pour construire le client
   opérateur de JB. Artefacts suffixés `-proches` / `-operateur`.
-- Mot de passe permanent préréglé : secret GitHub `SOS_PRESET_PASSWORD` injecté dans
-  src/sos.rs au build (jamais dans le dépôt). Posé une seule fois, si aucun mot de passe
-  local n'existe ; modifiable ensuite poste par poste dans Sécurité. Sans secret : rien.
+- Secret GitHub `SOS_PRESET_PASSWORD` injecté dans src/sos.rs au build (jamais dans le dépôt) :
+  client proches → mot de passe permanent entrant, posé une seule fois si aucun n'existe
+  (modifiable ensuite dans Sécurité) ; client opérateur → mot de passe de connexion sortante
+  par défaut (option amont default-connect-password), essayé avant de demander ; l'entrant de
+  l'opérateur reste à fixer par lui dans Sécurité. Sans secret : rien.
 - Le déclenchement planifié (cron nocturne) a été retiré : builds manuels seulement.
