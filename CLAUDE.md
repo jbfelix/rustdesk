@@ -48,8 +48,8 @@ Quatre secrets GitHub, tous produits par JB sur son Mac (jamais dans le dépôt 
 - `MACOS_P12_PASSWORD` : mot de passe de ce .p12.
 - `MACOS_CODESIGN_IDENTITY` : l'identité ENTRE GUILLEMETS, ex. `"Developer ID Application: Nom (TEAMID)"`
   (le workflow l'insère telle quelle dans le shell).
-- `MACOS_NOTARIZE_JSON` : clé API App Store Connect encodée par
-  `rcodesign encode-app-store-connect-api-key`, puis base64.
+- `APPLE_ID`, `APPLE_TEAM_ID` (2B7S7GBCSU), `APPLE_APP_PASSWORD` : les mêmes identifiants que le
+  profil notarytool « rops » de StockAAV/desktop (recette commune à toutes les apps macOS de JB).
 Dès que `MACOS_P12_BASE64` existe, le job macOS signe (hardened runtime, entitlements
 Release.entitlements), notarise et agrafe le dmg ; l'artefact `sos-macos-<arch>-<rôle>` contient
 `sos-<version>-<arch>-signe.dmg`. Sans ces secrets : signature ad hoc + « Ouvrir quand même ».
