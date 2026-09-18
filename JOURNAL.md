@@ -22,3 +22,6 @@
   workflow adaptée à SOS.app, artefact signé publié. Secrets à créer par JB (voir CLAUDE.md).
 - Interface épurée : compte, carnet en ligne, groupe et cartes d'aide retirés ; mises à jour
   amont désactivées ; réglages serveur masqués chez les proches.
+- Mises à jour automatiques depuis les releases du fork (étiquettes `1.5.0-n`), entrée `version`
+  du workflow ; installeur Windows auto-extractible publié. Reste : premier test réel d'une montée
+  de version (1.5.0-1 → 1.5.0-2) sur le Studio et sur un Windows.

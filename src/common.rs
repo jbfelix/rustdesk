@@ -999,7 +999,7 @@ pub fn is_modifier(evt: &KeyEvent) -> bool {
 }
 
 pub fn check_software_update() {
-    if is_custom_client() {
+    if is_custom_client() && crate::sos::build().is_none() {
         return;
     }
     let opt = LocalConfig::get_option(keys::OPTION_ENABLE_CHECK_UPDATE);
@@ -1008,10 +1008,57 @@ pub fn check_software_update() {
     }
 }
 
+/// SOS : dernière release (non pré-release) du fork, comparée à l'étiquette gravée dans le binaire.
+async fn sos_check_software_update(build: &str) -> hbb_common::ResultType<()> {
+    #[derive(serde_derive::Deserialize)]
+    struct Release {
+        tag_name: String,
+    }
+    let api = format!(
+        "https://api.github.com/repos/{}/releases/latest",
+        crate::sos::UPDATE_REPO
+    );
+    let client = create_http_client_async(TlsType::Rustls, false);
+    let resp = client
+        .get(&api)
+        .header("User-Agent", "SOS")
+        .header("Accept", "application/vnd.github+json")
+        .send()
+        .await?;
+    let bytes = resp.bytes().await?;
+    let release: Release = serde_json::from_slice(&bytes)?;
+    let tag = release.tag_name.trim().to_owned();
+    let newer = !tag.is_empty() && get_version_number(&tag) > get_version_number(build);
+    log::info!("SOS: build {}, dernière release {}, plus récente = {}", build, tag, newer);
+    let url = if newer {
+        format!(
+            "https://github.com/{}/releases/tag/{}",
+            crate::sos::UPDATE_REPO,
+            tag
+        )
+    } else {
+        String::new()
+    };
+    #[cfg(feature = "flutter")]
+    if newer {
+        let mut m = HashMap::new();
+        m.insert("name", "check_software_update_finish");
+        m.insert("url", &url);
+        if let Ok(data) = serde_json::to_string(&m) {
+            let _ = crate::flutter::push_global_event(crate::flutter::APP_TYPE_MAIN, data);
+        }
+    }
+    *SOFTWARE_UPDATE_URL.lock().unwrap() = url;
+    Ok(())
+}
+
 // No need to check `danger_accept_invalid_cert` for now.
 // Because the url is always `https://api.rustdesk.com/version/latest`.
 #[tokio::main(flavor = "current_thread")]
 pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
+    if let Some(build) = crate::sos::build() {
+        return sos_check_software_update(build).await;
+    }
     let (request, url) =
         hbb_common::version_check_request(hbb_common::VER_TYPE_RUSTDESK_CLIENT.to_string());
     let proxy_conf = Config::get_socks();

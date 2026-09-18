@@ -59,3 +59,20 @@ Release.entitlements), notarise et agrafe le dmg ; l'artefact `sos-macos-<arch>-
   `disable-group-panel` (local), `hide-help-cards` (builtin). Les favoris et sessions récentes
   restent (locaux). Vérification de mise à jour désactivée (elle pointerait vers rustdesk.com).
 - Proches : `hide-server-settings` en plus (serveur gravé, rien à saisir).
+
+## Mises à jour automatiques (releases du fork)
+- Le client (src/sos.rs `BUILD`) connaît l'étiquette de la release qui l'a produit. Le service
+  (Windows : rendezvous_mediator → updater ; macOS : service root) interroge chaque jour
+  `https://api.github.com/repos/jbfelix/rustdesk/releases/latest` (src/common.rs
+  `sos_check_software_update`), compare les étiquettes (`get_version_number` : `1.5.0-3` > `1.5.0-2`
+  > `1.5.0`), télécharge `sos-<étiquette>-<arch>.dmg|.exe` depuis la release et l'installe.
+  Allowlist de téléchargement : rustdesk/rustdesk OU jbfelix/rustdesk (src/updater.rs).
+- Build de release : « Run workflow » avec `version` = étiquette (ex. `1.5.0-1`), proches d'abord
+  (publie dmg + exe dans la release, non pré-release), puis opérateur (artefacts seulement).
+  `nightly` = build de test : BUILD reste un placeholder → pas de mise à jour automatique.
+- Schéma d'étiquettes : `<version amont>-<n>` ; n augmente à chaque build SOS sur la même version
+  amont, repart à 1 après un rebase sur une nouvelle version amont.
+- Windows : l'auto-update lance l'installeur téléchargé ; exe non signé → à vérifier au premier
+  passage (SmartScreen peut bloquer un lancement silencieux).
+- Artefacts Windows : `sos-windows-<arch>-<rôle>-installeur` = exe auto-extractible à distribuer
+  (le dossier `sos-windows-<arch>-<rôle>` est la version dépliée, pour débogage).
