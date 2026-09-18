@@ -999,13 +999,21 @@ jobs:
           rm -rf *.dmg || true
           # the identity secret carries its own shell quoting, so expand it inline like the dmg codesign below
           bash ./.github/scripts/sign-macos-app.sh \
-            ./flutter/build/macos/Build/Products/Release/RustDesk.app \
+            ./flutter/build/macos/Build/Products/Release/SOS.app \
             ${{ secrets.MACOS_CODESIGN_IDENTITY }} \
             ./flutter/macos/Runner/Release.entitlements
-          create-dmg --icon "RustDesk.app" 200 190 --hide-extension "RustDesk.app" --window-size 800 400 --app-drop-link 600 185 rustdesk-${{ env.VERSION }}.dmg ./flutter/build/macos/Build/Products/Release/RustDesk.app
-          codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict rustdesk-${{ env.VERSION }}.dmg -vvv
-          # notarize the rustdesk-${{ env.VERSION }}.dmg
-          rcodesign notary-submit --api-key-path ${{ github.workspace }}/rustdesk.json  --staple rustdesk-${{ env.VERSION }}.dmg
+          create-dmg --icon "SOS.app" 200 190 --hide-extension "SOS.app" --window-size 800 400 --app-drop-link 600 185 sos-${{ env.VERSION }}.dmg ./flutter/build/macos/Build/Products/Release/SOS.app
+          codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict sos-${{ env.VERSION }}.dmg -vvv
+          # notarize the sos-${{ env.VERSION }}.dmg
+          rcodesign notary-submit --api-key-path ${{ github.workspace }}/rustdesk.json  --staple sos-${{ env.VERSION }}.dmg
+          mv sos-${{ env.VERSION }}.dmg sos-${{ env.VERSION }}-${{ matrix.job.arch }}-signe.dmg
+
+      - name: SOS — Upload signed macOS app
+        if: env.MACOS_P12_BASE64 != null && env.UPLOAD_ARTIFACT == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sos-macos-${{ matrix.job.arch }}-${{ env.SOS_ROLE }}
+          path: sos-${{ env.VERSION }}-${{ matrix.job.arch }}-signe.dmg
 
       - name: Rename rustdesk
         if: env.UPLOAD_ARTIFACT == 'true'
@@ -1021,7 +1029,7 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            rustdesk*-${{ matrix.job.arch }}.dmg
+            sos*-${{ matrix.job.arch }}.dmg
 
   publish_unsigned:
     needs:

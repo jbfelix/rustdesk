@@ -15,3 +15,8 @@
   import log via hbb_common ; glob du renommage dmg ; préréglage entrant réservé aux proches,
   l'opérateur reçoit la phrase en mot de passe sortant par défaut. Champs Réseau vides = normal
   (surcharge « serveur personnalisé », les valeurs gravées s'appliquent).
+
+## 2026-09-18
+- Run #7 opérateur vert (macOS) ; jobs Linux/Android/Win32 rouges, hors périmètre (matrice à réduire).
+- Décidé : signature Developer ID + notarisation (JB a l'Apple Developer Program) ; branche signée du
+  workflow adaptée à SOS.app, artefact signé publié. Secrets à créer par JB (voir CLAUDE.md).
