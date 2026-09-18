@@ -19,6 +19,28 @@ pub fn apply() {
         .unwrap()
         .insert("verification-method".to_owned(), "use-permanent-password".to_owned());
 
+    // Pas de compte RustDesk, pas de carnet en ligne ni de groupe : tout est local
+    // (serveur libre, sans API). Retire les boutons « Connexion » et l'onglet Compte.
+    {
+        let mut hard = config::HARD_SETTINGS.write().unwrap();
+        hard.insert("disable-account".to_owned(), "Y".to_owned());
+        hard.insert("disable-ab".to_owned(), "Y".to_owned());
+    }
+    {
+        let mut local = config::OVERWRITE_LOCAL_SETTINGS.write().unwrap();
+        local.insert("disable-group-panel".to_owned(), "Y".to_owned());
+        local.insert("enable-check-update".to_owned(), "N".to_owned());
+        local.insert("allow-auto-update".to_owned(), "N".to_owned());
+    }
+    {
+        let mut builtin = config::BUILTIN_SETTINGS.write().unwrap();
+        builtin.insert("hide-help-cards".to_owned(), "Y".to_owned());
+        if INCOMING_ONLY == "Y" {
+            // Les proches n'ont pas à toucher au serveur : il est gravé.
+            builtin.insert("hide-server-settings".to_owned(), "Y".to_owned());
+        }
+    }
+
     // Client des proches : entrant seulement (pas de partie « contrôler »).
     if INCOMING_ONLY == "Y" {
         config::HARD_SETTINGS

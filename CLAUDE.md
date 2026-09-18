@@ -53,3 +53,9 @@ Quatre secrets GitHub, tous produits par JB sur son Mac (jamais dans le dépôt 
 Dès que `MACOS_P12_BASE64` existe, le job macOS signe (hardened runtime, entitlements
 Release.entitlements), notarise et agrafe le dmg ; l'artefact `sos-macos-<arch>-<rôle>` contient
 `sos-<version>-<arch>-signe.dmg`. Sans ces secrets : signature ad hoc + « Ouvrir quand même ».
+
+## Interface épurée (src/sos.rs)
+- Sans serveur API, rien à « connecter » : `disable-account`, `disable-ab` (HARD_SETTINGS),
+  `disable-group-panel` (local), `hide-help-cards` (builtin). Les favoris et sessions récentes
+  restent (locaux). Vérification de mise à jour désactivée (elle pointerait vers rustdesk.com).
+- Proches : `hide-server-settings` en plus (serveur gravé, rien à saisir).
