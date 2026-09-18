@@ -25,3 +25,5 @@
 - Mises à jour automatiques depuis les releases du fork (étiquettes `1.5.0-n`), entrée `version`
   du workflow ; installeur Windows auto-extractible publié. Reste : premier test réel d'une montée
   de version (1.5.0-1 → 1.5.0-2) sur le Studio et sur un Windows.
+- Décidé : un seul serveur hbbs pour famille et Actibel, sur le VPS Cloud node ; noms sos.jbfelix.be /
+  sos.actibel.be ; le VPS Lite sera résilié (garantie 30 jours). Build 1.5.0-2 = premier avec sos.jbfelix.be.

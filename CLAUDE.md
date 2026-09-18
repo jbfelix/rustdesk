@@ -7,7 +7,7 @@ Projet personnel de JB. Fork de rustdesk/rustdesk (AGPL), branche `sos`.
   `.github/workflows/flutter-build.yml` (jobs `build-for-windows-flutter` et
   `build-for-macOS`), par `sed` sur `libs/hbb_common/src/config.rs`
   (sous-module, donc pas modifiable par commit ici) :
-  `APP_NAME` = SOS, `RENDEZVOUS_SERVERS` = remote.jbfelix.be, `RS_PUB_KEY` = clé du hbbs.
+  `APP_NAME` = SOS, `RENDEZVOUS_SERVERS` = sos.jbfelix.be, `RS_PUB_KEY` = clé du hbbs.
 - macOS : `PRODUCT_NAME = SOS` (bundle SOS.app, exigé par le code Rust qui cherche
   `/Applications/{app_name}.app`), signature ad hoc du bundle avant le dmg.
 - Icônes : `res/*`, `flutter/assets/icon.svg` (tracés, pas de police),
@@ -15,7 +15,10 @@ Projet personnel de JB. Fork de rustdesk/rustdesk (AGPL), branche `sos`.
 - Windows : l'installeur renomme rustdesk.exe en SOS.exe à l'installation (code amont).
 
 ## Serveur
-- VPS Lite Infomaniak 179.237.67.146 (alias ssh `remote-jbf`), hbbs/hbbr Docker dans /opt/rustdesk.
+- hbbs/hbbr en Docker dans /opt/rustdesk sur le VPS Cloud « node » (83.228.217.121), commun famille + Actibel.
+  Noms DNS : sos.jbfelix.be (gravé dans le build SOS), sos.actibel.be (futur build Actibel),
+  remote.jbfelix.be (transitoire, clients < 1.5.0-2). Le VPS Lite 179.237.67.146 (`remote-jbf`) a servi
+  du 17 au 18/9/2026 puis a été résilié (remboursement 30 jours).
 - Ports 21115-21119/tcp + 21116/udp : à ouvrir dans ufw ET dans le pare-feu Infomaniak du VPS.
 
 ## Build

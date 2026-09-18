@@ -159,11 +159,11 @@ jobs:
           f=libs/hbb_common/src/config.rs
           sed -i.bak \
             -e 's#RwLock::new("RustDesk".to_owned())#RwLock::new("SOS".to_owned())#' \
-            -e 's#&\["rs-ny.rustdesk.com"\]#\&["remote.jbfelix.be"]#' \
+            -e 's#&\["rs-ny.rustdesk.com"\]#\&["sos.jbfelix.be"]#' \
             -e 's#OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=#x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=#' "$f"
           rm -f "$f.bak"
           grep -n 'APP_NAME: RwLock\|RENDEZVOUS_SERVERS: &\|pub const RS_PUB_KEY' "$f"
-          grep -q '"SOS".to_owned' "$f" && grep -q 'remote.jbfelix.be' "$f" && grep -q 'x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=' "$f"
+          grep -q '"SOS".to_owned' "$f" && grep -q 'sos.jbfelix.be' "$f" && grep -q 'x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=' "$f"
           python3 - <<'PY'
           import os
           p='src/sos.rs'; s=open(p, encoding='utf-8').read()
@@ -832,11 +832,11 @@ jobs:
           f=libs/hbb_common/src/config.rs
           sed -i.bak \
             -e 's#RwLock::new("RustDesk".to_owned())#RwLock::new("SOS".to_owned())#' \
-            -e 's#&\["rs-ny.rustdesk.com"\]#\&["remote.jbfelix.be"]#' \
+            -e 's#&\["rs-ny.rustdesk.com"\]#\&["sos.jbfelix.be"]#' \
             -e 's#OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=#x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=#' "$f"
           rm -f "$f.bak"
           grep -n 'APP_NAME: RwLock\|RENDEZVOUS_SERVERS: &\|pub const RS_PUB_KEY' "$f"
-          grep -q '"SOS".to_owned' "$f" && grep -q 'remote.jbfelix.be' "$f" && grep -q 'x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=' "$f"
+          grep -q '"SOS".to_owned' "$f" && grep -q 'sos.jbfelix.be' "$f" && grep -q 'x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=' "$f"
           python3 - <<'PY'
           import os
           p='src/sos.rs'; s=open(p, encoding='utf-8').read()
