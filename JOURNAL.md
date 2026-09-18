@@ -20,3 +20,5 @@
 - Run #7 opérateur vert (macOS) ; jobs Linux/Android/Win32 rouges, hors périmètre (matrice à réduire).
 - Décidé : signature Developer ID + notarisation (JB a l'Apple Developer Program) ; branche signée du
   workflow adaptée à SOS.app, artefact signé publié. Secrets à créer par JB (voir CLAUDE.md).
+- Interface épurée : compte, carnet en ligne, groupe et cartes d'aide retirés ; mises à jour
+  amont désactivées ; réglages serveur masqués chez les proches.
