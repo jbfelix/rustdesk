@@ -205,8 +205,9 @@ fn check_update(manually: bool) -> ResultType<()> {
                 );
             };
             format!(
-                "{}/rustdesk-{}-{}.{}",
+                "{}/{}-{}-{}.{}",
                 download_url,
+                crate::get_app_name().to_lowercase(),
                 version,
                 arch,
                 if update_msi { "msi" } else { "exe" }
@@ -376,8 +377,9 @@ pub fn get_update_download_file_from_url(url: &str) -> Option<PathBuf> {
     let tag = segments.next()?;
     let filename = segments.next()?;
 
-    if owner != "rustdesk"
-        || repo != "rustdesk"
+    let (sos_owner, sos_repo) = crate::sos::UPDATE_REPO.split_once('/').unwrap_or(("", ""));
+    let repo_ok = (owner == "rustdesk" && repo == "rustdesk") || (owner == sos_owner && repo == sos_repo);
+    if !repo_ok
         || releases != "releases"
         || download != "download"
         || tag.is_empty()
@@ -589,7 +591,13 @@ pub fn check_update_as_root() -> ResultType<bool> {
     let download_url = update_url.replace("tag", "download");
     let version = download_url.split('/').last().unwrap_or_default().to_string();
     let arch = if std::env::consts::ARCH == "aarch64" { "aarch64" } else { "x86_64" };
-    let dmg_url = format!("{}/rustdesk-{}-{}.dmg", download_url, version, arch);
+    let dmg_url = format!(
+        "{}/{}-{}-{}.dmg",
+        download_url,
+        crate::get_app_name().to_lowercase(),
+        version,
+        arch
+    );
     log::info!("[root-update] New version: {}, downloading from {}", version, dmg_url);
     // Validate URL against GitHub release allowlist before downloading as root
     let Some(file_path_validated) = get_update_download_file_from_url(&dmg_url) else {

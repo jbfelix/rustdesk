@@ -7,6 +7,10 @@ on:
         description: "Client des proches (entrant seulement). Décocher pour le client opérateur."
         type: boolean
         default: true
+      version:
+        description: "Étiquette de release (ex. 1.5.0-1). « nightly » = build de test, sans mise à jour automatique."
+        type: string
+        default: "nightly"
 
 jobs:
   run-flutter-nightly-build:
@@ -14,5 +18,5 @@ jobs:
     secrets: inherit
     with:
       upload-artifact: true
-      upload-tag: "nightly"
+      upload-tag: ${{ inputs.version }}
       sos-incoming-only: ${{ inputs.sos-incoming-only }}

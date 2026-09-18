@@ -83,7 +83,7 @@ jobs:
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         if: env.UPLOAD_ARTIFACT == 'true'
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             rustdesk.sbom.json
@@ -169,6 +169,9 @@ jobs:
           p='src/sos.rs'; s=open(p, encoding='utf-8').read()
           pw=os.environ.get('SOS_PRESET_PASSWORD','').replace('\\','\\\\').replace('"','\\"')
           s=s.replace('__SOS_PRESET_PASSWORD__', pw).replace('__SOS_INCOMING_ONLY__', os.environ.get('SOS_INCOMING_ONLY','N'))
+          tag=os.environ.get('TAG_NAME','nightly')
+          if tag and tag!='nightly': s=s.replace('__SOS_BUILD__', tag)
+          print('sos.rs: build =', tag)
           open(p,'w', encoding='utf-8').write(s)
           print('sos.rs: entrant seulement =', os.environ.get('SOS_INCOMING_ONLY'), '; mot de passe prérégle =', 'oui' if pw else 'non')
           PY
@@ -398,6 +401,23 @@ jobs:
           popd
           mkdir -p ./SignOutput
           mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.exe
+          cp ./SignOutput/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.exe ./sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.exe
+
+      - name: SOS — Upload Windows installer
+        if: env.UPLOAD_ARTIFACT == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sos-windows-${{ matrix.job.arch }}-${{ env.SOS_ROLE }}-installeur
+          path: sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.exe
+
+      - name: SOS — Publish installer to release
+        if: env.UPLOAD_ARTIFACT == 'true' && env.SOS_ROLE == 'proches'
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
+        with:
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
+          tag_name: ${{ env.TAG_NAME }}
+          files: |
+            sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.exe
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
@@ -822,6 +842,9 @@ jobs:
           p='src/sos.rs'; s=open(p, encoding='utf-8').read()
           pw=os.environ.get('SOS_PRESET_PASSWORD','').replace('\\','\\\\').replace('"','\\"')
           s=s.replace('__SOS_PRESET_PASSWORD__', pw).replace('__SOS_INCOMING_ONLY__', os.environ.get('SOS_INCOMING_ONLY','N'))
+          tag=os.environ.get('TAG_NAME','nightly')
+          if tag and tag!='nightly': s=s.replace('__SOS_BUILD__', tag)
+          print('sos.rs: build =', tag)
           open(p,'w', encoding='utf-8').write(s)
           print('sos.rs: entrant seulement =', os.environ.get('SOS_INCOMING_ONLY'), '; mot de passe prérégle =', 'oui' if pw else 'non')
           PY
@@ -958,14 +981,14 @@ jobs:
           CREATE_DMG="$(command -v create-dmg)"
           CREATE_DMG="$(readlink -f "$CREATE_DMG")"
           sed -i -e 's/MAXIMUM_UNMOUNTING_ATTEMPTS=3/MAXIMUM_UNMOUNTING_ATTEMPTS=7/' "$CREATE_DMG"
-          create-dmg --icon "SOS.app" 200 190 --hide-extension "SOS.app" --window-size 800 400 --app-drop-link 600 185 sos-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg ./flutter/build/macos/Build/Products/Release/SOS.app
+          create-dmg --icon "SOS.app" 200 190 --hide-extension "SOS.app" --window-size 800 400 --app-drop-link 600 185 sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.dmg ./flutter/build/macos/Build/Products/Release/SOS.app
 
       - name: Upload unsigned macOS app
         if: env.UPLOAD_ARTIFACT == 'true' && env.MACOS_P12_BASE64 == null
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sos-macos-${{ matrix.job.arch }}-${{ env.SOS_ROLE }}
-          path: sos-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg # can not upload the directory directly or tar.gz, which destroy the link structure, causing the codesign failed
+          path: sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.dmg # can not upload the directory directly or tar.gz, which destroy the link structure, causing the codesign failed
 
       - name: Codesign app and create signed dmg
         if: env.MACOS_P12_BASE64 != null && env.UPLOAD_ARTIFACT == 'true'
@@ -984,35 +1007,28 @@ jobs:
             ./flutter/build/macos/Build/Products/Release/SOS.app \
             ${{ secrets.MACOS_CODESIGN_IDENTITY }} \
             ./flutter/macos/Runner/Release.entitlements
-          create-dmg --icon "SOS.app" 200 190 --hide-extension "SOS.app" --window-size 800 400 --app-drop-link 600 185 sos-${{ env.VERSION }}.dmg ./flutter/build/macos/Build/Products/Release/SOS.app
-          codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict sos-${{ env.VERSION }}.dmg -vvv
+          DMG=sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.dmg
+          create-dmg --icon "SOS.app" 200 190 --hide-extension "SOS.app" --window-size 800 400 --app-drop-link 600 185 "$DMG" ./flutter/build/macos/Build/Products/Release/SOS.app
+          codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict "$DMG" -vvv
           # notarisation et agrafage (même recette que StockAAV : Apple ID + mot de passe d'app)
-          xcrun notarytool submit sos-${{ env.VERSION }}.dmg --apple-id "${{ secrets.APPLE_ID }}" --team-id "${{ secrets.APPLE_TEAM_ID }}" --password "${{ secrets.APPLE_APP_PASSWORD }}" --wait
-          xcrun stapler staple sos-${{ env.VERSION }}.dmg
-          mv sos-${{ env.VERSION }}.dmg sos-${{ env.VERSION }}-${{ matrix.job.arch }}-signe.dmg
+          xcrun notarytool submit "$DMG" --apple-id "${{ secrets.APPLE_ID }}" --team-id "${{ secrets.APPLE_TEAM_ID }}" --password "${{ secrets.APPLE_APP_PASSWORD }}" --wait
+          xcrun stapler staple "$DMG"
 
       - name: SOS — Upload signed macOS app
         if: env.MACOS_P12_BASE64 != null && env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sos-macos-${{ matrix.job.arch }}-${{ env.SOS_ROLE }}
-          path: sos-${{ env.VERSION }}-${{ matrix.job.arch }}-signe.dmg
+          path: sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.dmg
 
-      - name: Rename rustdesk
-        if: env.UPLOAD_ARTIFACT == 'true'
-        run: |
-          for name in sos*??.dmg; do
-              mv "$name" "${name%%.dmg}-${{ matrix.job.arch }}.dmg"
-          done
-
-      - name: Publish DMG package
-        if: env.UPLOAD_ARTIFACT == 'true'
+      - name: SOS — Publish DMG to release
+        if: env.UPLOAD_ARTIFACT == 'true' && env.SOS_ROLE == 'proches'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            sos*-${{ matrix.job.arch }}.dmg
+            sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.dmg
 
   publish_unsigned:
     needs:

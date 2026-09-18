@@ -6,6 +6,15 @@ use hbb_common::{config::{self, Config}, log};
 
 pub const PRESET_PASSWORD: &str = "__SOS_PRESET_PASSWORD__";
 pub const INCOMING_ONLY: &str = "__SOS_INCOMING_ONLY__";
+/// Étiquette de la release GitHub qui a produit ce binaire (ex. 1.5.0-3) ; placeholder = build de test.
+pub const BUILD: &str = "__SOS_BUILD__";
+/// Dépôt dont les releases servent de source de mise à jour.
+pub const UPDATE_REPO: &str = "jbfelix/rustdesk";
+
+/// Étiquette de build si elle a été gravée (sinon None : pas de mise à jour automatique).
+pub fn build() -> Option<&'static str> {
+    if BUILD.is_empty() || is_placeholder(BUILD) { None } else { Some(BUILD) }
+}
 
 fn is_placeholder(s: &str) -> bool {
     s.starts_with("__SOS_")
@@ -30,8 +39,13 @@ pub fn apply() {
         let mut local = config::OVERWRITE_LOCAL_SETTINGS.write().unwrap();
         local.insert("disable-group-panel".to_owned(), "Y".to_owned());
         local.insert("enable-check-update".to_owned(), "N".to_owned());
-        local.insert("allow-auto-update".to_owned(), "N".to_owned());
     }
+    // Mise à jour automatique (service Windows, service macOS) depuis les releases du fork,
+    // seulement pour un binaire issu d'une release étiquetée.
+    config::OVERWRITE_SETTINGS.write().unwrap().insert(
+        "allow-auto-update".to_owned(),
+        if build().is_some() { "Y" } else { "N" }.to_owned(),
+    );
     {
         let mut builtin = config::BUILTIN_SETTINGS.write().unwrap();
         builtin.insert("hide-help-cards".to_owned(), "Y".to_owned());
