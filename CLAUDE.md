@@ -41,3 +41,15 @@ Projet personnel de JB. Fork de rustdesk/rustdesk (AGPL), branche `sos`.
   par défaut (option amont default-connect-password), essayé avant de demander ; l'entrant de
   l'opérateur reste à fixer par lui dans Sécurité. Sans secret : rien.
 - Le déclenchement planifié (cron nocturne) a été retiré : builds manuels seulement.
+
+## Signature Apple (Developer ID + notarisation)
+Quatre secrets GitHub, tous produits par JB sur son Mac (jamais dans le dépôt ni le chat) :
+- `MACOS_P12_BASE64` : certificat « Developer ID Application » exporté en .p12, encodé base64.
+- `MACOS_P12_PASSWORD` : mot de passe de ce .p12.
+- `MACOS_CODESIGN_IDENTITY` : l'identité ENTRE GUILLEMETS, ex. `"Developer ID Application: Nom (TEAMID)"`
+  (le workflow l'insère telle quelle dans le shell).
+- `MACOS_NOTARIZE_JSON` : clé API App Store Connect encodée par
+  `rcodesign encode-app-store-connect-api-key`, puis base64.
+Dès que `MACOS_P12_BASE64` existe, le job macOS signe (hardened runtime, entitlements
+Release.entitlements), notarise et agrafe le dmg ; l'artefact `sos-macos-<arch>-<rôle>` contient
+`sos-<version>-<arch>-signe.dmg`. Sans ces secrets : signature ad hoc + « Ouvrir quand même ».
