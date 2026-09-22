@@ -38,12 +38,13 @@ Projet personnel de JB. Fork de rustdesk/rustdesk (AGPL), branche `sos`.
 - Entrée de workflow `sos-incoming-only` (défaut : vrai) → client des proches sans partie
   « contrôler » (HARD_SETTINGS conn-type=incoming). Décocher pour construire le client
   opérateur de JB. Artefacts suffixés `-proches` / `-operateur`.
-- Secret GitHub `SOS_PRESET_PASSWORD` injecté dans src/sos.rs au build (jamais dans le dépôt) :
-  client proches → mot de passe permanent entrant, posé une seule fois si aucun n'existe
-  (modifiable ensuite dans Sécurité) ; client opérateur → mot de passe de connexion sortante
-  par défaut (option amont default-connect-password), essayé avant de demander ; l'entrant de
-  l'opérateur reste à fixer par lui dans Sécurité. Sans secret : rien.
+- Aucun secret gravé (décision du 22/9/2026) : le client public est distribuable librement.
+  Modèle QuickSupport : verification-method = use-both-passwords ; à la première session le
+  proche lit ID + code temporaire, l'opérateur pose ensuite un mot de passe permanent propre au
+  poste (Sécurité, sur l'écran du proche) et le mémorise dans son client.
 - Le déclenchement planifié (cron nocturne) a été retiré : builds manuels seulement.
+- `prerelease` conditionné à `nightly` sur TOUTES les publications (les étapes amont republient
+  sur le même tag) : sans ça `releases/latest` ne voit rien et la MAJ auto ne part jamais.
 
 ## Signature Apple (Developer ID + notarisation)
 Quatre secrets GitHub, tous produits par JB sur son Mac (jamais dans le dépôt ni le chat) :
