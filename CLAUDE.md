@@ -60,8 +60,10 @@ Release.entitlements), notarise et agrafe le dmg ; l'artefact `sos-macos-<arch>-
 
 ## Interface épurée (src/sos.rs)
 - Sans serveur API, rien à « connecter » : `disable-account`, `disable-ab` (HARD_SETTINGS),
-  `disable-group-panel` (local), `hide-help-cards` (builtin). Les favoris et sessions récentes
-  restent (locaux). Vérification de mise à jour désactivée (elle pointerait vers rustdesk.com).
+  `disable-group-panel` (local), `hide-powered-by-me` (builtin). JAMAIS `hide-help-cards` : il
+  masque aussi les cartes de permissions macOS, et la carte « Installer le service » n'apparaît
+  qu'après elles (constaté le 22/9 : Studio sans démon). Les favoris et sessions récentes
+  restent (locaux). Vérification manuelle des mises à jour active (elle interroge le fork, voir plus bas).
 - Proches : `hide-server-settings` en plus (serveur gravé, rien à saisir).
 
 ## Mises à jour automatiques (releases du fork)
@@ -80,3 +82,10 @@ Release.entitlements), notarise et agrafe le dmg ; l'artefact `sos-macos-<arch>-
   passage (SmartScreen peut bloquer un lancement silencieux).
 - Artefacts Windows : `sos-windows-<arch>-<rôle>-installeur` = exe auto-extractible à distribuer
   (le dossier `sos-windows-<arch>-<rôle>` est la version dépliée, pour débogage).
+
+## Cibles construites
+- Seuls macOS (arm64, x86_64) et Windows (x64, ARM64) sont construits ; les autres jobs de
+  flutter-build.yml portent `if: false  # SOS : hors périmètre` (Linux, Android, iOS, web,
+  Windows 32 bits sciter, publish_unsigned). Sans eux, la release ne reçoit que les assets SOS.
+- Service macOS à la main si la carte ne s'affiche pas : `sudo bash installer-service-sos.sh`
+  (reproduit install.scpt ; journal du démon : /var/log/sos_service.out|err).

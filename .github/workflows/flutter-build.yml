@@ -507,6 +507,7 @@ jobs:
 
   # The fallback for the flutter version, we use Sciter for 32bit Windows.
   build-for-windows-sciter:
+    if: false  # SOS : hors périmètre
     name: ${{ matrix.job.target }} (${{ matrix.job.os }})
     runs-on: ${{ matrix.job.os }}
     # Temporarily disable this action due to additional test is needed.
@@ -667,7 +668,7 @@ jobs:
             ./SignOutput/rustdesk-*.exe
 
   build-rustdesk-ios:
-    if: ${{ inputs.upload-artifact }}
+    if: false  # SOS : hors périmètre
     name: build rustdesk ios ipa
     runs-on: ${{ matrix.job.os }}
     needs: [generate-bridge]
@@ -1033,7 +1034,7 @@ jobs:
       - build-for-windows-flutter
       - build-for-windows-sciter
     runs-on: ubuntu-latest
-    if: ${{ inputs.upload-artifact }}
+    if: false  # SOS : hors périmètre
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -1089,6 +1090,7 @@ jobs:
           files: rustdesk-${{ env.VERSION }}-unsigned.tar.gz
 
   build-rustdesk-android:
+    if: false  # SOS : hors périmètre
     needs: [generate-bridge]
     name: build rustdesk android apk ${{ matrix.job.target }}
     runs-on: ${{ matrix.job.os }}
@@ -1384,7 +1386,7 @@ jobs:
   build-rustdesk-android-universal:
     needs: [build-rustdesk-android]
     name: build rustdesk android universal apk
-    if: ${{ inputs.upload-artifact }}
+    if: false  # SOS : hors périmètre
     runs-on: ubuntu-24.04
     env:
       reltype: release
@@ -1567,6 +1569,7 @@ jobs:
             signed-apk/rustdesk-${{ env.VERSION }}-universal${{ env.suffix }}.apk
 
   build-rustdesk-linux:
+    if: false  # SOS : hors périmètre
     needs: [generate-bridge]
     name: build rustdesk linux ${{ matrix.job.target }}
     runs-on: ${{ matrix.job.on }}
@@ -1916,6 +1919,7 @@ jobs:
   # old for it. A separate job rather than a matrix entry of build-rustdesk-linux: appimage and
   # flatpak need that job, and a failure here must not skip them.
   build-rustdesk-linux-drm:
+    if: false  # SOS : hors périmètre
     needs: [generate-bridge]
     name: build rustdesk linux drm x86_64
     runs-on: ubuntu-22.04
@@ -2180,7 +2184,7 @@ jobs:
           path: ${{ env.DRM_DEB }}
 
   build-rustdesk-linux-sciter:
-    if: ${{ inputs.upload-artifact }}
+    if: false  # SOS : hors périmètre
     runs-on: ${{ matrix.job.on }}
     name: build-rustdesk-linux-sciter ${{ matrix.job.target }}
     strategy:
@@ -2425,7 +2429,7 @@ jobs:
     name: Build appimage ${{ matrix.job.target }}
     needs: [build-rustdesk-linux]
     runs-on: ubuntu-22.04
-    if: ${{ inputs.upload-artifact }}
+    if: false  # SOS : hors périmètre
     strategy:
       fail-fast: false
       matrix:
@@ -2478,7 +2482,7 @@ jobs:
       - build-rustdesk-linux
       - build-rustdesk-linux-sciter
     runs-on: ${{ matrix.job.on }}
-    if: ${{ inputs.upload-artifact }}
+    if: false  # SOS : hors périmètre
     strategy:
       fail-fast: false
       matrix:
@@ -2558,7 +2562,7 @@ jobs:
             flatpak/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.flatpak
 
   build-rustdesk-web:
-    if: False
+    if: false  # SOS : hors périmètre
     name: build-rustdesk-web
     runs-on: ubuntu-22.04
     permissions:

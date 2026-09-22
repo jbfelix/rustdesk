@@ -39,7 +39,7 @@ pub fn apply() {
     {
         let mut local = config::OVERWRITE_LOCAL_SETTINGS.write().unwrap();
         local.insert("disable-group-panel".to_owned(), "Y".to_owned());
-        local.insert("enable-check-update".to_owned(), "N".to_owned());
+        local.insert("enable-check-update".to_owned(), "Y".to_owned());
     }
     // Mise à jour automatique (service Windows, service macOS) depuis les releases du fork,
     // seulement pour un binaire issu d'une release étiquetée.
@@ -49,7 +49,10 @@ pub fn apply() {
     );
     {
         let mut builtin = config::BUILTIN_SETTINGS.write().unwrap();
-        builtin.insert("hide-help-cards".to_owned(), "Y".to_owned());
+        // « Utilise la technologie RustDesk » sur l'accueil : la mention légale est dans À propos.
+        builtin.insert("hide-powered-by-me".to_owned(), "Y".to_owned());
+        // hide-help-cards NE DOIT PAS être posé : il masque aussi les cartes de permissions
+        // macOS, et la carte « Installer le service » n'apparaît qu'après elles (bug du 22/9).
         if INCOMING_ONLY == "Y" {
             // Les proches n'ont pas à toucher au serveur : il est gravé.
             builtin.insert("hide-server-settings".to_owned(), "Y".to_owned());
