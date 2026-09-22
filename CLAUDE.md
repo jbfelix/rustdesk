@@ -93,3 +93,14 @@ Release.entitlements), notarise et agrafe le dmg ; l'artefact `sos-macos-<arch>-
   Windows 32 bits sciter, publish_unsigned). Sans eux, la release ne reçoit que les assets SOS.
 - Service macOS à la main si la carte ne s'affiche pas : `sudo bash installer-service-sos.sh`
   (reproduit install.scpt ; journal du démon : /var/log/sos_service.out|err).
+
+## À propos / vérification manuelle (22/9, patch sos-apropos-maj)
+- `main_get_version` renvoie l'étiquette gravée (1.5.0-3) quand elle existe ; sinon la version amont.
+- FFI `sos_is_release()` : tout ce que l'amont cache aux « custom clients » (case « Vérifier au
+  démarrage », case « Mise à jour automatique » macOS, carte « nouvelle version » de l'accueil,
+  `checkUpdate()` au lancement) est réactivé quand le build est étiqueté.
+- FFI `sos_check_update_now()` : bouton « Vérifier les mises à jour » dans À propos (interroge le
+  fork tout de suite, sans passer par l'option de démarrage) ; puis « Mettre à jour » = handleUpdate.
+- `download-file-<version>` (mise à jour depuis l'interface) nomme les assets `sos-…` et non `rustdesk-…`.
+- Lien sos.jbfelix.be et mention AGPL retirés de À propos à la demande de JB (la mention reste
+  dans le dépôt : README/LICENSE du fork).

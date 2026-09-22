@@ -43,3 +43,13 @@
 - Démon macOS : sos::apply() n'y tournait pas (service.rs a son propre main) → allow-auto-update non posé,
   + refus « custom client » dans check_update_as_root. Corrigé ; 1.5.0-3 est donc la première version
   dont le démon Mac se met à jour seul — le Studio en 1.5.0-1/-2 doit être monté à la main une dernière fois.
+
+## 2026-09-22 (suite) — 1.5.0-3, À propos
+- Fait : release 1.5.0-3 (proches) publiée avec le correctif démon ; opérateur 1.5.0-3 lancé (run #20).
+  Studio réinstallé en 1.5.0-3 à la main.
+- Constaté : À propos affichait 1.5.0 (version amont) et aucune option de mise à jour : l'amont
+  masque tout pour un custom client, et l'ID/clé gravés font de SOS un custom client.
+- Fait : patch sos-apropos-maj (voir CLAUDE.md) → étiquette affichée, bouton « Vérifier les mises
+  à jour », options réactivées, noms d'assets sos-… dans la MAJ manuelle, lien et mention retirés.
+- Reste ouvert : preuve de la MAJ auto Mac (1.5.0-4 après ce patch), Windows non testé,
+  sos.actibel.be, page de téléchargement.

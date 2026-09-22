@@ -1096,7 +1096,11 @@ pub fn main_get_license() -> String {
 }
 
 pub fn main_get_version() -> String {
-    get_version()
+    // SOS : afficher l'étiquette de release (ex. 1.5.0-3) plutôt que la version amont.
+    match crate::sos::build() {
+        Some(b) => b.to_string(),
+        None => get_version(),
+    }
 }
 
 pub fn main_get_fav() -> Vec<String> {
@@ -2478,6 +2482,16 @@ pub fn is_custom_client() -> SyncReturn<bool> {
     SyncReturn(crate::common::is_custom_client())
 }
 
+/// SOS : vrai quand le binaire porte une étiquette de release (mise à jour possible).
+pub fn sos_is_release() -> SyncReturn<bool> {
+    SyncReturn(crate::sos::build().is_some())
+}
+
+/// SOS : vérification manuelle des mises à jour ; voir common::sos_check_update_now.
+pub fn sos_check_update_now() -> String {
+    crate::common::sos_check_update_now()
+}
+
 pub fn is_disable_settings() -> SyncReturn<bool> {
     SyncReturn(config::is_disable_settings())
 }
@@ -2691,18 +2705,20 @@ pub fn main_get_common(key: String) -> String {
             }
         } else if key.starts_with("download-file-") {
             let _version = key.replace("download-file-", "");
+            // SOS : les assets de release s'appellent sos-<étiquette>-<arch>.<ext>
+            let _prefix = if crate::sos::build().is_some() { "sos" } else { "rustdesk" };
             #[cfg(target_os = "windows")]
             return match (
                 crate::platform::windows::is_msi_installed(),
                 crate::common::is_custom_client(),
             ) {
                 (Ok(true), false) => match crate::platform::windows::release_arch_suffix() {
-                    Some(arch) => format!("rustdesk-{_version}-{arch}.msi"),
+                    Some(arch) => format!("{_prefix}-{_version}-{arch}.msi"),
                     None => "error:unsupported".to_owned(),
                 },
                 (Ok(true), true) | (Ok(false), _) => {
                     match crate::platform::windows::release_arch_suffix() {
-                        Some(arch) => format!("rustdesk-{_version}-{arch}.exe"),
+                        Some(arch) => format!("{_prefix}-{_version}-{arch}.exe"),
                         None => "error:unsupported".to_owned(),
                     }
                 }
@@ -2714,9 +2730,9 @@ pub fn main_get_common(key: String) -> String {
             #[cfg(target_os = "macos")]
             {
                 return if cfg!(target_arch = "x86_64") {
-                    format!("rustdesk-{_version}-x86_64.dmg")
+                    format!("{_prefix}-{_version}-x86_64.dmg")
                 } else if cfg!(target_arch = "aarch64") {
-                    format!("rustdesk-{_version}-aarch64.dmg")
+                    format!("{_prefix}-{_version}-aarch64.dmg")
                 } else {
                     "error:unsupported".to_owned()
                 };

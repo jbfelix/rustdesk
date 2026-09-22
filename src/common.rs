@@ -1052,6 +1052,19 @@ async fn sos_check_software_update(build: &str) -> hbb_common::ResultType<()> {
     Ok(())
 }
 
+/// SOS : vérification manuelle (bouton « Vérifier les mises à jour »).
+/// Retourne l'URL de la release plus récente, "" si à jour, "error:…" sinon.
+#[tokio::main(flavor = "current_thread")]
+pub async fn sos_check_update_now() -> String {
+    match crate::sos::build() {
+        None => "error:build de test".to_owned(),
+        Some(b) => match sos_check_software_update(b).await {
+            Ok(()) => SOFTWARE_UPDATE_URL.lock().unwrap().clone(),
+            Err(e) => format!("error:{}", e),
+        },
+    }
+}
+
 // No need to check `danger_accept_invalid_cert` for now.
 // Because the url is always `https://api.rustdesk.com/version/latest`.
 #[tokio::main(flavor = "current_thread")]

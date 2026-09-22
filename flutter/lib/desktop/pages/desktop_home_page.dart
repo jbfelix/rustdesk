@@ -428,14 +428,15 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   Widget buildHelpCards(String updateUrl) {
-    if (!bind.isCustomClient() &&
+    final sosRelease = bind.sosIsRelease();
+    if ((!bind.isCustomClient() || sosRelease) &&
         updateUrl.isNotEmpty &&
         !isCardClosed &&
-        bind.mainUriPrefixSync().contains('rustdesk')) {
+        (sosRelease || bind.mainUriPrefixSync().contains('rustdesk'))) {
       final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
       String btnText = isToUpdate ? 'Update' : 'Download';
       GestureTapCallback onPressed = () async {
-        final Uri url = Uri.parse('https://rustdesk.com/download');
+        final Uri url = Uri.parse(sosRelease ? updateUrl : 'https://rustdesk.com/download');
         await launchUrl(url);
       };
       if (isToUpdate) {
@@ -451,7 +452,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           closeButton: true,
           help: isToUpdate ? 'Changelog' : null,
           link: isToUpdate
-              ? 'https://github.com/rustdesk/rustdesk/releases/tag/${bind.mainGetNewVersion()}'
+              ? (sosRelease
+                  ? updateUrl
+                  : 'https://github.com/rustdesk/rustdesk/releases/tag/${bind.mainGetNewVersion()}')
               : null);
     }
     if (systemError.isNotEmpty) {

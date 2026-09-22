@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common.dart';
+import 'package:flutter_hbb/desktop/widgets/update_progress.dart';
 import 'package:flutter_hbb/common/widgets/audio_input.dart';
 import 'package:flutter_hbb/common/widgets/setting_widgets.dart';
 import 'package:flutter_hbb/consts.dart';
@@ -483,7 +484,7 @@ class _GeneralState extends State<_General> {
     final incomingOnly = bind.isIncomingOnly();
     final outgoingOnly = bind.isOutgoingOnly();
     final showAutoUpdate = (isWindows && bind.mainIsInstalled()) ||
-    (isMacOS && bind.mainIsInstalled() && bind.mainIsInstalledDaemon(prompt: false) && !bind.isCustomClient());
+    (isMacOS && bind.mainIsInstalled() && bind.mainIsInstalledDaemon(prompt: false) && (!bind.isCustomClient() || bind.sosIsRelease()));
     final children = <Widget>[
       if (!isWeb && !incomingOnly)
         _OptionCheckBox(context, 'Confirm before closing multiple tabs',
@@ -551,7 +552,7 @@ class _GeneralState extends State<_General> {
             ),
           ),
       ],
-      if (!isWeb && !bind.isCustomClient())
+      if (!isWeb && (!bind.isCustomClient() || bind.sosIsRelease()))
         _OptionCheckBox(
           context,
           'Check for software update on startup',
@@ -2552,25 +2553,64 @@ class _AboutState extends State<_About> {
               SelectionArea(
                   child: Text('${translate('ID')}: $myId')
                       .marginSymmetric(vertical: 4.0)),
-              InkWell(
-                  onTap: () {
-                    launchUrlString('https://sos.jbfelix.be');
-                  },
-                  child: Text(
-                    'sos.jbfelix.be',
-                    style: linkStyle,
-                  ).marginSymmetric(vertical: 4.0)),
-              // Mention légale AGPL-3.0 : SOS est une version modifiée de RustDesk.
-              SelectionArea(
-                  child: Text(
-                'SOS est construit sur RustDesk © Purslane Tech Pte. Ltd., logiciel libre sous licence AGPL-3.0.\nCode source : github.com/jbfelix/rustdesk',
-                style: TextStyle(color: Theme.of(context).hintColor, fontSize: 12),
-              ).marginSymmetric(vertical: 8.0)),
+              if (bind.sosIsRelease()) _SosUpdateCheck(),
             ],
           ).marginOnly(left: _kContentHMargin)
         ]),
       );
     });
+  }
+}
+
+/// SOS : vérification manuelle des mises à jour (releases du fork).
+class _SosUpdateCheck extends StatefulWidget {
+  @override
+  State<_SosUpdateCheck> createState() => _SosUpdateCheckState();
+}
+
+class _SosUpdateCheckState extends State<_SosUpdateCheck> {
+  bool _checking = false;
+  String? _result;
+
+  Future<void> _check() async {
+    setState(() {
+      _checking = true;
+      _result = null;
+    });
+    final url = await bind.sosCheckUpdateNow();
+    if (!mounted) return;
+    setState(() {
+      _checking = false;
+      if (url.startsWith('error:')) {
+        _result = 'Vérification impossible : ${url.substring(6)}';
+      } else if (url.isEmpty) {
+        _result = 'SOS est à jour';
+      } else {
+        stateGlobal.updateUrl.value = url;
+        _result = 'Nouvelle version disponible : ${url.split('/').last}';
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final url = stateGlobal.updateUrl.value;
+    final canInstall = (isWindows || isMacOS) && bind.mainIsInstalled();
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        ElevatedButton(
+            onPressed: _checking ? null : _check,
+            child: Text(
+                _checking ? 'Vérification…' : 'Vérifier les mises à jour')),
+        if (_result != null) Text(_result!).marginOnly(left: 12),
+      ]).marginSymmetric(vertical: 8.0),
+      if (url.isNotEmpty && _result != null)
+        ElevatedButton(
+            onPressed: () =>
+                canInstall ? handleUpdate(url) : launchUrlString(url),
+            child: Text(canInstall ? translate('Update') : translate('Download')))
+            .marginSymmetric(vertical: 4.0),
+    ]);
   }
 }
 
