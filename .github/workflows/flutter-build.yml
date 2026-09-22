@@ -55,7 +55,6 @@ env:
   MACOS_P12_BASE64: "${{ secrets.MACOS_P12_BASE64 }}"
   UPLOAD_ARTIFACT: "${{ inputs.upload-artifact }}"
   SOS_INCOMING_ONLY: "${{ inputs.sos-incoming-only && 'Y' || 'N' }}"
-  SOS_PRESET_PASSWORD: "${{ secrets.SOS_PRESET_PASSWORD }}"
   SOS_ROLE: "${{ inputs.sos-incoming-only && 'proches' || 'operateur' }}"
   SIGN_BASE_URL: "${{ secrets.SIGN_BASE_URL }}-2"
 
@@ -167,13 +166,12 @@ jobs:
           python3 - <<'PY'
           import os
           p='src/sos.rs'; s=open(p, encoding='utf-8').read()
-          pw=os.environ.get('SOS_PRESET_PASSWORD','').replace('\\','\\\\').replace('"','\\"')
-          s=s.replace('__SOS_PRESET_PASSWORD__', pw).replace('__SOS_INCOMING_ONLY__', os.environ.get('SOS_INCOMING_ONLY','N'))
+          s=s.replace('__SOS_INCOMING_ONLY__', os.environ.get('SOS_INCOMING_ONLY','N'))
           tag=os.environ.get('TAG_NAME','nightly')
           if tag and tag!='nightly': s=s.replace('__SOS_BUILD__', tag)
           print('sos.rs: build =', tag)
           open(p,'w', encoding='utf-8').write(s)
-          print('sos.rs: entrant seulement =', os.environ.get('SOS_INCOMING_ONLY'), '; mot de passe prérégle =', 'oui' if pw else 'non')
+          print('sos.rs: entrant seulement =', os.environ.get('SOS_INCOMING_ONLY'))
           PY
 
 
@@ -501,7 +499,7 @@ jobs:
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         if: env.UPLOAD_ARTIFACT == 'true'
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             ./SignOutput/rustdesk-*.msi
@@ -663,7 +661,7 @@ jobs:
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         if: env.UPLOAD_ARTIFACT == 'true'
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             ./SignOutput/rustdesk-*.exe
@@ -784,7 +782,7 @@ jobs:
       #   # if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
       #   uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
       #   with:
-      #     prerelease: true
+      #     prerelease: ${{ env.TAG_NAME == 'nightly' }}
       #     tag_name: ${{ env.TAG_NAME }}
       #     files: |
       #       flutter/build/ios/ipa/*.ipa
@@ -840,13 +838,12 @@ jobs:
           python3 - <<'PY'
           import os
           p='src/sos.rs'; s=open(p, encoding='utf-8').read()
-          pw=os.environ.get('SOS_PRESET_PASSWORD','').replace('\\','\\\\').replace('"','\\"')
-          s=s.replace('__SOS_PRESET_PASSWORD__', pw).replace('__SOS_INCOMING_ONLY__', os.environ.get('SOS_INCOMING_ONLY','N'))
+          s=s.replace('__SOS_INCOMING_ONLY__', os.environ.get('SOS_INCOMING_ONLY','N'))
           tag=os.environ.get('TAG_NAME','nightly')
           if tag and tag!='nightly': s=s.replace('__SOS_BUILD__', tag)
           print('sos.rs: build =', tag)
           open(p,'w', encoding='utf-8').write(s)
-          print('sos.rs: entrant seulement =', os.environ.get('SOS_INCOMING_ONLY'), '; mot de passe prérégle =', 'oui' if pw else 'non')
+          print('sos.rs: entrant seulement =', os.environ.get('SOS_INCOMING_ONLY'))
           PY
 
 
@@ -1087,7 +1084,7 @@ jobs:
       - name: Publish unsigned app
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: rustdesk-${{ env.VERSION }}-unsigned.tar.gz
 
@@ -1370,7 +1367,7 @@ jobs:
         if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             ${{steps.sign-rustdesk.outputs.signedReleaseFile}}
@@ -1379,7 +1376,7 @@ jobs:
         if: env.ANDROID_SIGNING_KEY == null && env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             signed-apk/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
@@ -1555,7 +1552,7 @@ jobs:
         if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             ${{steps.sign-rustdesk.outputs.signedReleaseFile}}
@@ -1564,7 +1561,7 @@ jobs:
         if: env.ANDROID_SIGNING_KEY == null && env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             signed-apk/rustdesk-${{ env.VERSION }}-universal${{ env.suffix }}.apk
@@ -1872,7 +1869,7 @@ jobs:
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             rustdesk-*.deb
@@ -1908,7 +1905,7 @@ jobs:
         if: matrix.job.arch == 'x86_64' && env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             res/rustdesk-${{ env.VERSION }}*.zst
@@ -2168,7 +2165,7 @@ jobs:
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             ${{ env.DRM_DEB }}
@@ -2412,7 +2409,7 @@ jobs:
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.deb
@@ -2470,7 +2467,7 @@ jobs:
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             ./appimage/rustdesk-${{ env.VERSION }}-*.AppImage
@@ -2555,7 +2552,7 @@ jobs:
       - name: Publish flatpak package
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             flatpak/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.flatpak
@@ -2639,7 +2636,7 @@ jobs:
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
-          prerelease: true
+          prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             flutter/build/rustdesk-${{ env.VERSION }}-${{ env.RELEASE_NAME }}.tar.gz

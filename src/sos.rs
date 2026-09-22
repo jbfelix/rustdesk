@@ -1,10 +1,10 @@
 //! SOS — réglages gravés au build (voir CLAUDE.md à la racine).
-//! Les deux constantes ci-dessous sont remplacées par le workflow avant compilation ;
+//! Les constantes ci-dessous sont remplacées par le workflow avant compilation ;
 //! laissées telles quelles (build local), rien n'est appliqué.
+//! Aucun secret n'est gravé : le client public est distribuable librement.
 
-use hbb_common::{config::{self, Config}, log};
+use hbb_common::config;
 
-pub const PRESET_PASSWORD: &str = "__SOS_PRESET_PASSWORD__";
 pub const INCOMING_ONLY: &str = "__SOS_INCOMING_ONLY__";
 /// Étiquette de la release GitHub qui a produit ce binaire (ex. 1.5.0-3) ; placeholder = build de test.
 pub const BUILD: &str = "__SOS_BUILD__";
@@ -22,11 +22,12 @@ fn is_placeholder(s: &str) -> bool {
 
 /// Appelé au démarrage de chaque processus (interface, service, cm).
 pub fn apply() {
-    // Vérification par mot de passe permanent seul, non modifiable dans l'interface.
+    // Modèle QuickSupport : code temporaire affiché sous l'ID pour la première session,
+    // mot de passe permanent propre au poste posé ensuite par l'opérateur (Sécurité).
     config::OVERWRITE_SETTINGS
         .write()
         .unwrap()
-        .insert("verification-method".to_owned(), "use-permanent-password".to_owned());
+        .insert("verification-method".to_owned(), "use-both-passwords".to_owned());
 
     // Pas de compte RustDesk, pas de carnet en ligne ni de groupe : tout est local
     // (serveur libre, sans API). Retire les boutons « Connexion » et l'onglet Compte.
@@ -61,28 +62,5 @@ pub fn apply() {
             .write()
             .unwrap()
             .insert("conn-type".to_owned(), "incoming".to_owned());
-    }
-
-    if PRESET_PASSWORD.is_empty() || is_placeholder(PRESET_PASSWORD) {
-        return;
-    }
-
-    if INCOMING_ONLY == "Y" {
-        // Client des proches : mot de passe permanent préréglé, posé une seule fois
-        // si aucun n'existe encore (modifiable ensuite dans Sécurité).
-        let (stored, _) = Config::get_local_permanent_password_storage_and_salt();
-        if stored.is_empty() {
-            if !Config::set_permanent_password(PRESET_PASSWORD) {
-                log::error!("SOS: impossible de poser le mot de passe permanent préréglé");
-            }
-        }
-    } else {
-        // Client opérateur : la phrase sert de mot de passe de connexion sortante par
-        // défaut (option amont « default-connect-password »), essayée avant de demander.
-        // Son propre mot de passe entrant reste à fixer par l'opérateur dans Sécurité.
-        config::BUILTIN_SETTINGS
-            .write()
-            .unwrap()
-            .insert("default-connect-password".to_owned(), PRESET_PASSWORD.to_owned());
     }
 }

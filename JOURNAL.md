@@ -27,3 +27,12 @@
   de version (1.5.0-1 → 1.5.0-2) sur le Studio et sur un Windows.
 - Décidé : un seul serveur hbbs pour famille et Actibel, sur le VPS Cloud node ; noms sos.jbfelix.be /
   sos.actibel.be ; le VPS Lite sera résilié (garantie 30 jours). Build 1.5.0-2 = premier avec sos.jbfelix.be.
+
+## 2026-09-22
+- Release 1.5.0-1 proches en ligne (signée, notarisée) mais pré-version + assets amont : MAJ auto
+  inopérante. Corrigé : prerelease conditionné partout. Cron master en échec chaque nuit → sos → master.
+- Décidé : plus de mot de passe préréglé (le client proches sera en téléchargement public sur
+  sos.jbfelix.be / sos.actibel.be, un secret gravé y serait lisible). Modèle QuickSupport, mot de
+  passe permanent par poste posé par l'opérateur à la première session. Secret SOS_PRESET_PASSWORD
+  à supprimer du dépôt GitHub.
+- Opérateur 1.5.0-1 (run #16) lancé pour le MacBook. Reste : page de téléchargement nginx sur node.
