@@ -2484,7 +2484,7 @@ pub fn is_custom_client() -> SyncReturn<bool> {
 
 /// SOS : vrai quand le binaire porte une étiquette de release (mise à jour possible).
 pub fn sos_is_release() -> SyncReturn<bool> {
-    SyncReturn(crate::sos::build().is_some())
+    SyncReturn(crate::sos::update_source().is_some())
 }
 
 /// SOS : vérification manuelle des mises à jour ; voir common::sos_check_update_now.

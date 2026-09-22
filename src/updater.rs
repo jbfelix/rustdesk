@@ -543,7 +543,7 @@ pub fn check_update_as_root() -> ResultType<bool> {
         return Ok(false);
     }
     // SOS : un build étiqueté se met à jour depuis les releases du fork (voir src/sos.rs).
-    if crate::is_custom_client() && crate::sos::build().is_none() {
+    if crate::is_custom_client() && crate::sos::update_source().is_none() {
         log::info!("[root-update] Custom client detected, skipping stock update.");
         return Ok(false);
     }

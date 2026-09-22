@@ -16,6 +16,13 @@ pub fn build() -> Option<&'static str> {
     if BUILD.is_empty() || is_placeholder(BUILD) { None } else { Some(BUILD) }
 }
 
+/// Source de mise à jour utilisable ? Seulement pour le client des proches : la release ne
+/// publie que ce client, un opérateur qui s'y mettrait à jour deviendrait « entrant seul »
+/// (constaté le 22/9 sur le MacBook). L'opérateur se met à jour à la main (artefact du run).
+pub fn update_source() -> Option<&'static str> {
+    if INCOMING_ONLY == "Y" { build() } else { None }
+}
+
 fn is_placeholder(s: &str) -> bool {
     s.starts_with("__SOS_")
 }
@@ -45,7 +52,7 @@ pub fn apply() {
     // seulement pour un binaire issu d'une release étiquetée.
     config::OVERWRITE_SETTINGS.write().unwrap().insert(
         "allow-auto-update".to_owned(),
-        if build().is_some() { "Y" } else { "N" }.to_owned(),
+        if update_source().is_some() { "Y" } else { "N" }.to_owned(),
     );
     {
         let mut builtin = config::BUILTIN_SETTINGS.write().unwrap();

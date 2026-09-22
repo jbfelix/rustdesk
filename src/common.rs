@@ -999,7 +999,7 @@ pub fn is_modifier(evt: &KeyEvent) -> bool {
 }
 
 pub fn check_software_update() {
-    if is_custom_client() && crate::sos::build().is_none() {
+    if is_custom_client() && crate::sos::update_source().is_none() {
         return;
     }
     let opt = LocalConfig::get_option(keys::OPTION_ENABLE_CHECK_UPDATE);
@@ -1056,8 +1056,8 @@ async fn sos_check_software_update(build: &str) -> hbb_common::ResultType<()> {
 /// Retourne l'URL de la release plus récente, "" si à jour, "error:…" sinon.
 #[tokio::main(flavor = "current_thread")]
 pub async fn sos_check_update_now() -> String {
-    match crate::sos::build() {
-        None => "error:build de test".to_owned(),
+    match crate::sos::update_source() {
+        None => "error:pas de source de mise à jour pour ce client".to_owned(),
         Some(b) => match sos_check_software_update(b).await {
             Ok(()) => SOFTWARE_UPDATE_URL.lock().unwrap().clone(),
             Err(e) => format!("error:{}", e),
@@ -1069,7 +1069,7 @@ pub async fn sos_check_update_now() -> String {
 // Because the url is always `https://api.rustdesk.com/version/latest`.
 #[tokio::main(flavor = "current_thread")]
 pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
-    if let Some(build) = crate::sos::build() {
+    if let Some(build) = crate::sos::update_source() {
         return sos_check_software_update(build).await;
     }
     let (request, url) =

@@ -56,3 +56,9 @@
 - Constaté (MAJ auto Studio 1.5.0-3 → 1.5.0-4) : détection, téléchargement et extraction OK, puis refus
   « staged bundle version mismatch » : le bundle porte la version amont 1.5.0. Correctif workflow :
   CFBundleShortVersionString = étiquette. Nécessite 1.5.0-5 ; 1.5.0-4 restera à installer à la main.
+- Prouvé : MAJ auto macOS 1.5.0-3 → 1.5.0-5 sur le Studio (démon, plist gravé).
+- Incident : « Mettre à jour » depuis l'opérateur du MacBook a installé le client des proches
+  (la release n'a qu'un dmg). Correctif : `sos::update_source()` → MAJ auto et bouton coupés hors
+  proches. Réinstallation manuelle de l'opérateur 1.5.0-5.
+- Run #24 (opérateur 1.5.0-5) : job macOS x86_64 rouge sur « Install vcpkg dependencies » (aléa
+  runner ; vert au run #23 sur le même commit). Sans impact (pas de Mac Intel).

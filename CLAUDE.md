@@ -108,3 +108,7 @@ Release.entitlements), notarise et agrafe le dmg ; l'artefact `sos-macos-<arch>-
   téléchargé à l'étiquette attendue → l'étape « SOS — étiquette de release dans Info.plist » grave
   l'étiquette avant signature (constaté le 22/9 : « staged bundle version mismatch: expected 1.5.0-4,
   found 1.5.0 » ; la 1.5.0-4 n'est donc PAS installable automatiquement, la 1.5.0-5 sera la première).
+- Opérateur : PAS de mise à jour automatique ni de bouton « Vérifier » (`sos::update_source()` = None
+  hors client des proches) : la release ne contient que le client des proches, un opérateur qui s'y
+  mettrait à jour deviendrait « entrant seul » (arrivé le 22/9 sur le MacBook). L'opérateur se met à
+  jour à la main depuis l'artefact `sos-macos-aarch64-operateur` / `sos-windows-…-operateur-installeur`.
