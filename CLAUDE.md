@@ -67,6 +67,10 @@ Release.entitlements), notarise et agrafe le dmg ; l'artefact `sos-macos-<arch>-
 - Proches : `hide-server-settings` en plus (serveur gravé, rien à saisir).
 
 ## Mises à jour automatiques (releases du fork)
+- `sos::apply()` doit tourner dans CHAQUE processus : core_main (interface, --server, --service
+  Windows) ET src/service.rs (démon macOS, entrée séparée) — oubli constaté le 22/9 : le démon
+  disait « Auto update is disabled ». `check_update_as_root` ignore aussi le refus « custom client »
+  quand BUILD est gravé.
 - Le client (src/sos.rs `BUILD`) connaît l'étiquette de la release qui l'a produit. Le service
   (Windows : rendezvous_mediator → updater ; macOS : service root) interroge chaque jour
   `https://api.github.com/repos/jbfelix/rustdesk/releases/latest` (src/common.rs
