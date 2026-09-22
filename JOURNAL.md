@@ -40,3 +40,6 @@
   démon jamais installé sur le Studio (script installer-service-sos.sh en contournement). Corrigé :
   hide-help-cards retiré, hide-powered-by-me à la place, vérification manuelle des MAJ réactivée,
   matrice réduite à Mac + Windows.
+- Démon macOS : sos::apply() n'y tournait pas (service.rs a son propre main) → allow-auto-update non posé,
+  + refus « custom client » dans check_update_as_root. Corrigé ; 1.5.0-3 est donc la première version
+  dont le démon Mac se met à jour seul — le Studio en 1.5.0-1/-2 doit être monté à la main une dernière fois.
