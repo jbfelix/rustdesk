@@ -965,6 +965,15 @@ jobs:
           fi
           ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
 
+      - name: SOS — étiquette de release dans Info.plist
+        if: env.TAG_NAME != 'nightly'
+        run: |
+          # Le démon de mise à jour (src/platform/macos.rs) refuse un bundle dont
+          # CFBundleShortVersionString ≠ étiquette attendue (constaté le 22/9 : 1.5.0-3 → 1.5.0-4).
+          PLIST=./flutter/build/macos/Build/Products/Release/SOS.app/Contents/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${{ env.TAG_NAME }}" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST"
+
       - name: SOS — signature ad hoc du bundle (pas de certificat Apple)
         if: env.MACOS_P12_BASE64 == null
         run: |

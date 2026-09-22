@@ -104,3 +104,7 @@ Release.entitlements), notarise et agrafe le dmg ; l'artefact `sos-macos-<arch>-
 - `download-file-<version>` (mise à jour depuis l'interface) nomme les assets `sos-…` et non `rustdesk-…`.
 - Lien sos.jbfelix.be et mention AGPL retirés de À propos à la demande de JB (la mention reste
   dans le dépôt : README/LICENSE du fork).
+- macOS, MAJ auto : le démon (src/platform/macos.rs) compare `CFBundleShortVersionString` du bundle
+  téléchargé à l'étiquette attendue → l'étape « SOS — étiquette de release dans Info.plist » grave
+  l'étiquette avant signature (constaté le 22/9 : « staged bundle version mismatch: expected 1.5.0-4,
+  found 1.5.0 » ; la 1.5.0-4 n'est donc PAS installable automatiquement, la 1.5.0-5 sera la première).

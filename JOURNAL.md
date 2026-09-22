@@ -53,3 +53,6 @@
   à jour », options réactivées, noms d'assets sos-… dans la MAJ manuelle, lien et mention retirés.
 - Reste ouvert : preuve de la MAJ auto Mac (1.5.0-4 après ce patch), Windows non testé,
   sos.actibel.be, page de téléchargement.
+- Constaté (MAJ auto Studio 1.5.0-3 → 1.5.0-4) : détection, téléchargement et extraction OK, puis refus
+  « staged bundle version mismatch » : le bundle porte la version amont 1.5.0. Correctif workflow :
+  CFBundleShortVersionString = étiquette. Nécessite 1.5.0-5 ; 1.5.0-4 restera à installer à la main.
