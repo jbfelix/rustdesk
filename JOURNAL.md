@@ -36,3 +36,7 @@
   passe permanent par poste posé par l'opérateur à la première session. Secret SOS_PRESET_PASSWORD
   à supprimer du dépôt GitHub.
 - Opérateur 1.5.0-1 (run #16) lancé pour le MacBook. Reste : page de téléchargement nginx sur node.
+- 1.5.0-2 proches publiée (latest OK). Bug : hide-help-cards cachait les cartes de permissions macOS →
+  démon jamais installé sur le Studio (script installer-service-sos.sh en contournement). Corrigé :
+  hide-help-cards retiré, hide-powered-by-me à la place, vérification manuelle des MAJ réactivée,
+  matrice réduite à Mac + Windows.
