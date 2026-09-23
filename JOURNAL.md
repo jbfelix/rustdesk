@@ -62,3 +62,7 @@
   proches. Réinstallation manuelle de l'opérateur 1.5.0-5.
 - Run #24 (opérateur 1.5.0-5) : job macOS x86_64 rouge sur « Install vcpkg dependencies » (aléa
   runner ; vert au run #23 sur le même commit). Sans impact (pas de Mac Intel).
+
+## 2026-09-23
+- Fait : renommage des livrables en sos-client-… (release) / sos-operator-… (artefacts), env SOS_KIND ;
+  updater aligné ; alias ancien nom publié en release pour la transition (à retirer après 1.5.0-6).

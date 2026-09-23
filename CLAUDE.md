@@ -23,7 +23,13 @@ Projet personnel de JB. Fork de rustdesk/rustdesk (AGPL), branche `sos`.
 
 ## Build
 - Actions → « Flutter Nightly Build » → Run workflow sur la branche `sos`.
-- Artefacts : `sos-macos-aarch64` (dmg), `sos-windows-x86_64` (dossier exe).
+- Noms (23/9) : fichiers `sos-client-<étiquette>-<arch>.dmg|exe` (release, proches) et
+  `sos-operator-<étiquette>-<arch>.dmg|exe` (artefacts seulement) ; artefacts
+  `sos-{client|operator}-macos-<arch>`, `sos-{client|operator}-windows-<arch>[-installeur]`
+  (env `SOS_KIND`). L'updater (src/updater.rs, flutter_ffi download-file) cherche
+  `sos::RELEASE_FILE_PREFIX` = sos-client. Transition : la release publie AUSSI l'ancien nom
+  `sos-<étiquette>-<arch>` pour les clients ≤ 1.5.0-5 (Studio) — étapes « alias ancien nom »,
+  à retirer après 1.5.0-6.
 - Workflow permissions du dépôt en « Read and write » (job generate-sbom).
 
 ## Pièges rencontrés

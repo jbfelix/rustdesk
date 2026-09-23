@@ -207,7 +207,11 @@ fn check_update(manually: bool) -> ResultType<()> {
             format!(
                 "{}/{}-{}-{}.{}",
                 download_url,
-                crate::get_app_name().to_lowercase(),
+                if crate::sos::update_source().is_some() {
+                    crate::sos::RELEASE_FILE_PREFIX.to_owned()
+                } else {
+                    crate::get_app_name().to_lowercase()
+                },
                 version,
                 arch,
                 if update_msi { "msi" } else { "exe" }
@@ -595,7 +599,11 @@ pub fn check_update_as_root() -> ResultType<bool> {
     let dmg_url = format!(
         "{}/{}-{}-{}.dmg",
         download_url,
-        crate::get_app_name().to_lowercase(),
+        if crate::sos::update_source().is_some() {
+            crate::sos::RELEASE_FILE_PREFIX.to_owned()
+        } else {
+            crate::get_app_name().to_lowercase()
+        },
         version,
         arch
     );

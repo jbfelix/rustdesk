@@ -2706,7 +2706,7 @@ pub fn main_get_common(key: String) -> String {
         } else if key.starts_with("download-file-") {
             let _version = key.replace("download-file-", "");
             // SOS : les assets de release s'appellent sos-<étiquette>-<arch>.<ext>
-            let _prefix = if crate::sos::build().is_some() { "sos" } else { "rustdesk" };
+            let _prefix = if crate::sos::update_source().is_some() { crate::sos::RELEASE_FILE_PREFIX } else { "rustdesk" };
             #[cfg(target_os = "windows")]
             return match (
                 crate::platform::windows::is_msi_installed(),

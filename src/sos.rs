@@ -10,6 +10,8 @@ pub const INCOMING_ONLY: &str = "__SOS_INCOMING_ONLY__";
 pub const BUILD: &str = "__SOS_BUILD__";
 /// Dépôt dont les releases servent de source de mise à jour.
 pub const UPDATE_REPO: &str = "jbfelix/rustdesk";
+/// Préfixe des assets de release : sos-client-<étiquette>-<arch>.<dmg|exe> (workflow SOS_KIND).
+pub const RELEASE_FILE_PREFIX: &str = "sos-client";
 
 /// Étiquette de build si elle a été gravée (sinon None : pas de mise à jour automatique).
 pub fn build() -> Option<&'static str> {
