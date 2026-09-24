@@ -1,4 +1,4 @@
-//! SOS — réglages gravés au build (voir CLAUDE.md à la racine).
+//! SOS — réglages gravés au build (voir notes de projet à la racine).
 //! Les constantes ci-dessous sont remplacées par le workflow avant compilation ;
 //! laissées telles quelles (build local), rien n'est appliqué.
 //! Aucun secret n'est gravé : le client public est distribuable librement.

@@ -19,7 +19,7 @@
 ## 2026-09-18
 - Run #7 opérateur vert (macOS) ; jobs Linux/Android/Win32 rouges, hors périmètre (matrice à réduire).
 - Décidé : signature Developer ID + notarisation (JB a l'Apple Developer Program) ; branche signée du
-  workflow adaptée à SOS.app, artefact signé publié. Secrets à créer par JB (voir CLAUDE.md).
+  workflow adaptée à SOS.app, artefact signé publié. Secrets à créer par JB (voir notes de projet).
 - Interface épurée : compte, carnet en ligne, groupe et cartes d'aide retirés ; mises à jour
   amont désactivées ; réglages serveur masqués chez les proches.
 - Mises à jour automatiques depuis les releases du fork (étiquettes `1.5.0-n`), entrée `version`
@@ -49,7 +49,7 @@
   Studio réinstallé en 1.5.0-3 à la main.
 - Constaté : À propos affichait 1.5.0 (version amont) et aucune option de mise à jour : l'amont
   masque tout pour un custom client, et l'ID/clé gravés font de SOS un custom client.
-- Fait : patch sos-apropos-maj (voir CLAUDE.md) → étiquette affichée, bouton « Vérifier les mises
+- Fait : patch sos-apropos-maj (voir notes de projet) → étiquette affichée, bouton « Vérifier les mises
   à jour », options réactivées, noms d'assets sos-… dans la MAJ manuelle, lien et mention retirés.
 - Reste ouvert : preuve de la MAJ auto Mac (1.5.0-4 après ce patch), Windows non testé,
   sos.actibel.be, page de téléchargement.
@@ -66,3 +66,9 @@
 ## 2026-09-23
 - Fait : renommage des livrables en sos-client-… (release) / sos-operator-… (artefacts), env SOS_KIND ;
   updater aligné ; alias ancien nom publié en release pour la transition (à retirer après 1.5.0-6).
+
+## 2026-09-24 — purge des références d'outils dans le dépôt
+
+- **Fait** : notes d'agent (CLAUDE.md, .claude/) sorties de git (gardées sur disque, exclusion globale `~/.config/git/ignore` + `.git/info/exclude`) ; mentions retirées des textes ; historique réécrit (auteurs, trailers de co-auteur et de session) et poussé en force, commit de tête `[skip ci]`. Sauvegarde : `~/Claude/Projects/_sauvegardes-purge-20260924/`.
+- **Gardé à dessein** : chemins `~/Claude/Projects/…` (nom réel du dossier), listes de robots bloqués (ClaudeBot…), noms de personnes.
+- **Reste ouvert** : phase 2 — la fonction « Pour Claude » du paquet remarques (interface, API `?claude=1`, champ `pourClaude`, auteur « Claude » dans les données, comptes `claude…` exclus des stats) à renommer « agent » avec migration des données, dans le paquet puis chez tous les hôtes.
