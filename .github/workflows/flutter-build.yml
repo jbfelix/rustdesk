@@ -434,68 +434,36 @@ jobs:
           # Keep the action's default x86 MSBuild for the existing x64 MSI job.
           msbuild-architecture: ${{ matrix.job.arch == 'aarch64' && 'arm64' || 'x86' }}
 
-      - name: Build msi
-        # Builds the MSI for the matrix arch. res/msi (WiX v4 + native CustomActions) carries
-        # both x64 and ARM64 platform configs; WcaUtil/DUtil ship arm64 libs. msbuild platform
-        # is x64 / ARM64; the produced Package.msi is globbed since its bin/<platform>/ dir varies.
+      - name: SOS — Build msi
+        # MSI SOS (déploiement Intune). preprocess.py (WiX v4) attend <app-name>.exe dans le dossier
+        # source, d'où la copie de ./rustdesk avec rustdesk.exe renommé en SOS.exe. Version MSI =
+        # VERSION.n, n = suffixe de l'étiquette de release (0 pour nightly). L'UpgradeCode dérive du
+        # nom « SOS » : une nouvelle version = mise à niveau majeure MSI. Les étapes amont « Build msi »
+        # et « Build pre-built MSI template » (gabarit du générateur Pro) sont remplacées par celle-ci.
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
+          $rev = 0
+          if ('${{ env.TAG_NAME }}' -match '^\d+\.\d+\.\d+-(\d+)$') { $rev = [int]$Matches[1] }
+          Copy-Item -Recurse ./rustdesk ./sos-msi
+          Move-Item ./sos-msi/rustdesk.exe ./sos-msi/SOS.exe
           pushd ./res/msi
-          python preprocess.py --arp -d ../../rustdesk
+          python preprocess.py -d ../../sos-msi --app-name SOS -m SOS -v ${{ env.VERSION }} --revision-version $rev
           nuget restore msi.sln
           $msiPlatform = if ('${{ matrix.job.arch }}' -eq 'aarch64') { 'ARM64' } else { 'x64' }
           msbuild msi.sln -p:Configuration=Release -p:Platform=$msiPlatform /p:TargetVersion=Windows10
           $msi = Get-ChildItem ./Package/bin/*/Release/en-us/Package.msi | Select-Object -First 1
-          mv $msi.FullName ../../SignOutput/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.msi
-          sha256sum ../../SignOutput/rustdesk-*.msi
-
-      - name: Build pre-built MSI template
-        # Two things this works around: preprocess.py rewrites res/msi in place, so the
-        # tree is reset around this second variant; and it locates the app as
-        # <app-name>.exe inside the dist, so the dist copy is renamed to match.
-        #
-        # The placeholder is chosen to keep this template as close to the shipped msi as
-        # possible: eight characters like "RustDesk", and a valid 8.3 name, so WiX
-        # derives no short name for it. A longer placeholder would get one, and a patch
-        # cannot rewrite a truncated placeholder, leaving short names pointing at it.
-        #
-        # It still has to be unique, which is why "RustDesk" itself cannot be used:
-        # it also names payload that must never be renamed, such as librustdesk.dll
-        # and drivers\RustDeskPrinterDriver.
-        #
-        #
-        # Building the arm64 template on the native arm64 runner makes the ARM
-        # package available: the build agents are x64 and cannot run
-        # preprocess.py against an ARM exe.
-        if: env.UPLOAD_ARTIFACT == 'true'
-        run: |
-          git checkout -- res/msi
-          cp -r ./rustdesk ./rustdesk-msi-template
-          mv ./rustdesk-msi-template/rustdesk.exe ./rustdesk-msi-template/RDAPPNAM.exe
-          Set-Content -Path ./rustdesk-msi-template/custom.txt -Value 'placeholder' -NoNewline
-          $assets = './rustdesk-msi-template/data/flutter_assets/assets'
-          New-Item -ItemType Directory -Force -Path $assets | Out-Null
-          foreach ($a in 'icon.ico','icon.png','logo.png','logo_light.png','logo_dark.png') {
-            Set-Content -Path "$assets/$a" -Value 'placeholder' -NoNewline
-          }
-          pushd ./res/msi
-          python preprocess.py --arp --template --revision-version 0 -d ../../rustdesk-msi-template --app-name RDAPPNAM
-          $msiPlatform = if ('${{ matrix.job.arch }}' -eq 'aarch64') { 'ARM64' } else { 'x64' }
-          msbuild msi.sln -t:clean -p:Configuration=Release -p:Platform=$msiPlatform
-          msbuild msi.sln -p:Configuration=Release -p:Platform=$msiPlatform /p:TargetVersion=Windows10
-          $msi = Get-ChildItem ./Package/bin/*/Release/en-us/Package.msi | Select-Object -First 1
           popd
-          mkdir ./msi-template
-          mv $msi.FullName ./msi-template/rustdesk-template-${{ matrix.job.arch }}.msi
+          Move-Item $msi.FullName ./sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.msi
           git checkout -- res/msi
-          rm -r -fo ./rustdesk-msi-template
+          Remove-Item -Recurse -Force ./sos-msi
+          Get-FileHash ./sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.msi
 
-      - name: Upload unsigned msi template
+      - name: SOS — Upload msi
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: rustdesk-unsigned-msi-template-${{ matrix.job.arch }}
-          path: ./msi-template
+          name: sos-${{ env.SOS_KIND }}-windows-${{ matrix.job.arch }}-msi
+          path: sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.msi
 
       - name: Sign rustdesk self-extracted file
         if: env.UPLOAD_ARTIFACT == 'true' && env.SIGN_BASE_URL != '-2'

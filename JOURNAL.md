@@ -107,3 +107,15 @@
   perdu. C'est la pollution de release notée le 22/9. Corrigé : les 3 étapes amont « Publish Release »
   (sbom, windows, windows-sciter) passent en `if: false` — seules les étapes « SOS — Publish … »
   publient. Pré-version `nightly` polluée créée sur le fork : à supprimer à la main.
+
+## 2026-09-28 (après-midi) — volet Actibel / Intune
+- **Décidé (JB)** : MSI SOS déployé par Intune en app Win32 ; ID = nom de machine et mot de passe permanent
+  PAR POSTE posés par script post-install ; annuaire = mini point d'inscription HTTPS sur le VPS node
+  (sos.actibel.be) + page opérateurs (option b) ; build Actibel sans MAJ auto (montées par MSI/Intune).
+- **Constaté** : le workflow produisait déjà un MSI mais avec `--app-name RustDesk` (produit et service
+  nommés RustDesk), envoyé seulement par l'étape amont « Publish Release » coupée ce matin. preprocess.py
+  brande tout par `--app-name` et attend `<app-name>.exe` dans la source.
+- **Fait** : étape « SOS — Build msi » + artefact `-msi` (voir CLAUDE.md, section Build) ; étapes MSI amont
+  retirées. Artefact seulement, pas publié en release (le MSI est un livrable Intune, pas public).
+- **Reste ouvert** : entrée de workflow « serveur » (sos.actibel.be) + MAJ auto coupée pour ce build ;
+  annuaire (projet Node — règle backtibel-agent → Synology à confirmer par JB) ; script Intune ; test réel.
