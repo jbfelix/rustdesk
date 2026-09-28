@@ -119,3 +119,5 @@
   retirées. Artefact seulement, pas publié en release (le MSI est un livrable Intune, pas public).
 - **Reste ouvert** : entrée de workflow « serveur » (sos.actibel.be) + MAJ auto coupée pour ce build ;
   annuaire (projet Node — règle backtibel-agent → Synology à confirmer par JB) ; script Intune ; test réel.
+- **Fait** : entrée `sos-serveur` (défaut sos.jbfelix.be) gravée par le sed ; `sos.actibel.be` → édition
+  `actibel` (SOS_ROLE/SOS_KIND, `sos::EDITION`), artefacts `sos-actibel-…`, updater coupé par `is_actibel()`.

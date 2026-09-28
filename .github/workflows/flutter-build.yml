@@ -12,6 +12,9 @@ on:
       sos-incoming-only:
         type: boolean
         default: true
+      sos-serveur:
+        type: string
+        default: "sos.jbfelix.be"
 
 # NOTE: F-Droid builder script 'flutter/build_fdroid.sh' reads environment
 # variables from this workflow!
@@ -55,9 +58,12 @@ env:
   MACOS_P12_BASE64: "${{ secrets.MACOS_P12_BASE64 }}"
   UPLOAD_ARTIFACT: "${{ inputs.upload-artifact }}"
   SOS_INCOMING_ONLY: "${{ inputs.sos-incoming-only && 'Y' || 'N' }}"
-  SOS_ROLE: "${{ inputs.sos-incoming-only && 'proches' || 'operateur' }}"
-  # Préfixe des fichiers et artefacts : sos-client (proches, publié en release) / sos-operator (artefacts seulement)
-  SOS_KIND: "${{ inputs.sos-incoming-only && 'client' || 'operator' }}"
+  # Serveur gravé dans hbb_common (rendezvous). sos.actibel.be = édition Actibel : entrant seul, jamais
+  # publiée en release, sans mise à jour automatique (montées de version par MSI via Intune).
+  SOS_SERVEUR: "${{ inputs.sos-serveur }}"
+  SOS_ROLE: "${{ inputs.sos-serveur == 'sos.actibel.be' && 'actibel' || (inputs.sos-incoming-only && 'proches' || 'operateur') }}"
+  # Préfixe des fichiers et artefacts : sos-client (proches, publié en release) / sos-operator / sos-actibel (artefacts seulement)
+  SOS_KIND: "${{ inputs.sos-serveur == 'sos.actibel.be' && 'actibel' || (inputs.sos-incoming-only && 'client' || 'operator') }}"
   SIGN_BASE_URL: "${{ secrets.SIGN_BASE_URL }}-2"
 
 jobs:
@@ -160,15 +166,16 @@ jobs:
           f=libs/hbb_common/src/config.rs
           sed -i.bak \
             -e 's#RwLock::new("RustDesk".to_owned())#RwLock::new("SOS".to_owned())#' \
-            -e 's#&\["rs-ny.rustdesk.com"\]#\&["sos.jbfelix.be"]#' \
+            -e 's#&\["rs-ny.rustdesk.com"\]#\&["'"$SOS_SERVEUR"'"]#' \
             -e 's#OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=#x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=#' "$f"
           rm -f "$f.bak"
           grep -n 'APP_NAME: RwLock\|RENDEZVOUS_SERVERS: &\|pub const RS_PUB_KEY' "$f"
-          grep -q '"SOS".to_owned' "$f" && grep -q 'sos.jbfelix.be' "$f" && grep -q 'x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=' "$f"
+          grep -q '"SOS".to_owned' "$f" && grep -q "$SOS_SERVEUR" "$f" && grep -q 'x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=' "$f"
           python3 - <<'PY'
           import os
           p='src/sos.rs'; s=open(p, encoding='utf-8').read()
           s=s.replace('__SOS_INCOMING_ONLY__', os.environ.get('SOS_INCOMING_ONLY','N'))
+          s=s.replace('__SOS_EDITION__', os.environ.get('SOS_ROLE','operateur'))
           tag=os.environ.get('TAG_NAME','nightly')
           if tag and tag!='nightly': s=s.replace('__SOS_BUILD__', tag)
           print('sos.rs: build =', tag)
@@ -807,15 +814,16 @@ jobs:
           f=libs/hbb_common/src/config.rs
           sed -i.bak \
             -e 's#RwLock::new("RustDesk".to_owned())#RwLock::new("SOS".to_owned())#' \
-            -e 's#&\["rs-ny.rustdesk.com"\]#\&["sos.jbfelix.be"]#' \
+            -e 's#&\["rs-ny.rustdesk.com"\]#\&["'"$SOS_SERVEUR"'"]#' \
             -e 's#OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=#x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=#' "$f"
           rm -f "$f.bak"
           grep -n 'APP_NAME: RwLock\|RENDEZVOUS_SERVERS: &\|pub const RS_PUB_KEY' "$f"
-          grep -q '"SOS".to_owned' "$f" && grep -q 'sos.jbfelix.be' "$f" && grep -q 'x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=' "$f"
+          grep -q '"SOS".to_owned' "$f" && grep -q "$SOS_SERVEUR" "$f" && grep -q 'x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=' "$f"
           python3 - <<'PY'
           import os
           p='src/sos.rs'; s=open(p, encoding='utf-8').read()
           s=s.replace('__SOS_INCOMING_ONLY__', os.environ.get('SOS_INCOMING_ONLY','N'))
+          s=s.replace('__SOS_EDITION__', os.environ.get('SOS_ROLE','operateur'))
           tag=os.environ.get('TAG_NAME','nightly')
           if tag and tag!='nightly': s=s.replace('__SOS_BUILD__', tag)
           print('sos.rs: build =', tag)

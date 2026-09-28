@@ -6,6 +6,8 @@
 use hbb_common::config;
 
 pub const INCOMING_ONLY: &str = "__SOS_INCOMING_ONLY__";
+/// Édition gravée : proches | operateur | actibel (serveur sos.actibel.be, déployée par MSI/Intune).
+pub const EDITION: &str = "__SOS_EDITION__";
 /// Étiquette de la release GitHub qui a produit ce binaire (ex. 1.5.0-3) ; placeholder = build de test.
 pub const BUILD: &str = "__SOS_BUILD__";
 /// Dépôt dont les releases servent de source de mise à jour.
@@ -22,7 +24,12 @@ pub fn build() -> Option<&'static str> {
 /// publie que ce client, un opérateur qui s'y mettrait à jour deviendrait « entrant seul »
 /// (constaté le 22/9 sur le MacBook). L'opérateur se met à jour à la main (artefact du run).
 pub fn update_source() -> Option<&'static str> {
-    if INCOMING_ONLY == "Y" { build() } else { None }
+    if INCOMING_ONLY == "Y" && !is_actibel() { build() } else { None }
+}
+
+/// Édition Actibel : postes gérés par Intune, montées de version par MSI, jamais par l'updater.
+pub fn is_actibel() -> bool {
+    EDITION == "actibel"
 }
 
 fn is_placeholder(s: &str) -> bool {

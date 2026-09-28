@@ -11,6 +11,10 @@ on:
         description: "Étiquette de release (ex. 1.5.0-1). « nightly » = build de test, sans mise à jour automatique."
         type: string
         default: "nightly"
+      sos-serveur:
+        description: "Serveur gravé : sos.jbfelix.be (famille) ou sos.actibel.be (build Actibel : entrant seul, sans mise à jour automatique, MSI pour Intune)."
+        type: string
+        default: "sos.jbfelix.be"
 
 jobs:
   run-flutter-nightly-build:
@@ -20,3 +24,4 @@ jobs:
       upload-artifact: true
       upload-tag: ${{ inputs.version }}
       sos-incoming-only: ${{ inputs.sos-incoming-only }}
+      sos-serveur: ${{ inputs.sos-serveur }}
