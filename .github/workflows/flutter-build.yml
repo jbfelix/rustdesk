@@ -82,7 +82,7 @@ jobs:
 
       - name: Publish Release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
-        if: env.UPLOAD_ARTIFACT == 'true'
+        if: false  # SOS : la release ne reçoit que les assets SOS (étapes « SOS — Publish … »), jamais rustdesk-*
         with:
           prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
@@ -505,7 +505,7 @@ jobs:
 
       - name: Publish Release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
-        if: env.UPLOAD_ARTIFACT == 'true'
+        if: false  # SOS : la release ne reçoit que les assets SOS (étapes « SOS — Publish … »), jamais rustdesk-*
         with:
           prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
@@ -668,7 +668,7 @@ jobs:
 
       - name: Publish Release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
-        if: env.UPLOAD_ARTIFACT == 'true'
+        if: false  # SOS : la release ne reçoit que les assets SOS (étapes « SOS — Publish … »), jamais rustdesk-*
         with:
           prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}

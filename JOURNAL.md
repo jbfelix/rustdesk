@@ -72,3 +72,38 @@
 - **Fait** : notes d'agent (CLAUDE.md, .claude/) sorties de git (gardées sur disque, exclusion globale `~/.config/git/ignore` + `.git/info/exclude`) ; mentions retirées des textes ; historique réécrit (auteurs, trailers de co-auteur et de session) et poussé en force, commit de tête `[skip ci]`. Sauvegarde : `~/Claude/Projects/_sauvegardes-purge-20260924/`.
 - **Gardé à dessein** : chemins `~/Claude/Projects/…` (nom réel du dossier), listes de robots bloqués (ClaudeBot…), noms de personnes.
 - **Reste ouvert** : phase 2 — la fonction « Pour Claude » du paquet remarques (interface, API `?claude=1`, champ `pourClaude`, auteur « Claude » dans les données, comptes `claude…` exclus des stats) à renommer « agent » avec migration des données, dans le paquet puis chez tous les hôtes.
+
+## 2026-09-28 — bug d'installation à neuf Windows (exe non renommé)
+- **Constaté (JB, Windows)** : le client opérateur (`operator.exe`, artefact seul) comme le client
+  proches s'installent avec le binaire encore nommé `rustdesk.exe` sur disque, alors que le
+  registre/les raccourcis attendent `SOS.exe` (gravé via `get_app_name()`) → le programme ne
+  retrouve pas `sos.exe` après installation.
+- **Cause** : `install_me()` (`src/platform/windows.rs`) copie le dossier source (XCOPY,
+  `copy_exe_cmd`) mais n'appelait jamais `rename_exe_cmd`, contrairement à `update_me()` qui
+  enchaîne les deux. Le binaire flutter Windows n'est jamais rebaptisé au build (seul macOS a
+  `PRODUCT_NAME=SOS`), donc rien ne corrige le nom à l'installation à neuf — bug latent amont
+  pour tout client personnalisé (custom client / APP_NAME), pas spécifique à SOS.
+- **Fait** : ajout de `{rename_exe}` / `rename_exe_cmd(&src_exe, &path)?` dans le bloc `cmds` de
+  `install_me`, en symétrie avec `update_me` (commit aa15593, branche sos). `src_exe` et `path`
+  étaient déjà dans la portée de la fonction.
+- **Fait** : commit aa15593 poussé par JB sur `origin/sos`. Runs de test lancés (étiquette
+  `nightly`, sans effet sur la release ni la MAJ auto) : #28 proches et #29 opérateur, sur
+  `sos@aa15593`, via Chrome (JB connecté).
+- **Reste ouvert** : attendre l'issue des runs #28/#29, puis installer à neuf sous Windows
+  (les deux rôles) pour vérifier que le binaire est bien posé en `SOS.exe` (plus `rustdesk.exe`)
+  et que raccourcis/registre/service le retrouvent. Correctif non encore validé en pratique.
+- Runs #28 (proches) et #29 (opérateur), nightly sur aa15593 : Windows x86_64 VERT dans les deux
+  → artefacts `sos-client-windows-x86_64-installeur` (#28, id 10962501593) et
+  `sos-operator-windows-x86_64-installeur` (#29, id 10962443222) disponibles pour le test d'install à neuf.
+- **Rouge 1 (macOS, les deux archs, les deux runs)** : étape « Codesign app and create signed dmg »,
+  notarytool → `HTTP 401 Invalid credentials … app-specific password`. Les secrets APPLE_ID /
+  APPLE_APP_PASSWORD sont refusés par Apple ; c'était vert le 23/9 (#26/#27). Sans rapport avec le
+  correctif Windows. À faire par JB : régénérer un mot de passe d'app (account.apple.com → Connexion
+  et sécurité → Mots de passe d'app), mettre à jour le secret APPLE_APP_PASSWORD du fork ; vérifier
+  aussi le profil notarytool « rops » du Mac (StockAAV…) s'il partage le même mot de passe d'app.
+- **Rouge 2 (Windows ARM64, les deux runs)** : étape amont « Publish Release » (softprops) qui envoie
+  `rustdesk-1.5.0-aarch64.{exe,msi}` sur la release `nightly` → 404 / 422 (collision entre jobs/runs
+  sur les mêmes noms d'assets). Les artefacts SOS étaient déjà déposés avant cette étape : rien de
+  perdu. C'est la pollution de release notée le 22/9. Corrigé : les 3 étapes amont « Publish Release »
+  (sbom, windows, windows-sciter) passent en `if: false` — seules les étapes « SOS — Publish … »
+  publient. Pré-version `nightly` polluée créée sur le fork : à supprimer à la main.
