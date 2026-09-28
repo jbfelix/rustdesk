@@ -121,3 +121,12 @@
   annuaire (projet Node — règle backtibel-agent → Synology à confirmer par JB) ; script Intune ; test réel.
 - **Fait** : entrée `sos-serveur` (défaut sos.jbfelix.be) gravée par le sed ; `sos.actibel.be` → édition
   `actibel` (SOS_ROLE/SOS_KIND, `sos::EDITION`), artefacts `sos-actibel-…`, updater coupé par `is_actibel()`.
+
+## 2026-09-28 — clôture
+**Fait** : correctif install à neuf Windows (aa15593) validé par une install MSI (SOS.exe posé, service OK, prise
+en main OK) ; étapes amont « Publish Release » coupées (7f519ed) ; MSI SOS (3e95790) ; édition Actibel via
+`sos-serveur` (94d7109). Détail du volet Actibel : `~/Claude/Projects/sos-actibel/JOURNAL.md`.
+**Constaté** : un opérateur antérieur à 672e80e se met encore à jour seul vers la release proches — réinstaller
+l'opérateur 1.5.0-6 (run #27) ; sur le MacBook il n'y a pas de démon, c'est l'app qui se mettait à jour.
+**Ouvert** : notarisation macOS (mot de passe d'app Apple à régénérer, secret APPLE_APP_PASSWORD) ; supprimer la
+pré-version `nightly` polluée et le secret SOS_PRESET_PASSWORD ; retirer les alias « ancien nom » après 1.5.0-6.
