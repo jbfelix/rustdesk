@@ -130,3 +130,7 @@ en main OK) ; étapes amont « Publish Release » coupées (7f519ed) ; MSI SOS (
 l'opérateur 1.5.0-6 (run #27) ; sur le MacBook il n'y a pas de démon, c'est l'app qui se mettait à jour.
 **Ouvert** : notarisation macOS (mot de passe d'app Apple à régénérer, secret APPLE_APP_PASSWORD) ; supprimer la
 pré-version `nightly` polluée et le secret SOS_PRESET_PASSWORD ; retirer les alias « ancien nom » après 1.5.0-6.
+- **17:20** : notarisation macOS RÉPARÉE — run #31 (opérateur nightly, c676fcc) : « Codesign app and create
+  signed dmg » vert sur aarch64 avec le secret APPLE_APP_PASSWORD régénéré par JB (le profil notarytool « rops »
+  du Mac, lui, n'avait jamais cessé de marcher : c'était bien le secret GitHub, pas le compte Apple).
+  Nettoyage fait : release + tag `nightly` supprimés, secret SOS_PRESET_PASSWORD supprimé.
