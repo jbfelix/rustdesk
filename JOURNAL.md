@@ -140,3 +140,8 @@ pré-version `nightly` polluée et le secret SOS_PRESET_PASSWORD ; retirer les a
 éditions (`sos-<tag>-…` et `sos-client-<tag>-…`) : `release_file_prefix()` choisit selon l'édition, `update_source()`
 n'exclut plus que l'édition Actibel (Intune maître). Non compilé ici (pas de cargo) : le prochain run le prouvera ;
 **à tester sur le MacBook de JB** (mise à jour root macOS jamais vue tourner) et sur un poste opérateur Windows.
+- **18:30** : release 1.5.0-8 en cours — runs #34 (client) et #35 (opérateur) sur `sos` @1030033. Piège : le run #33
+  lancé depuis le formulaire GitHub était parti sur `master` (23d83f4) et avait créé une release/tag 1.5.0-8 vides →
+  annulé, release et tag supprimés. Désormais lancer par `gh workflow run flutter-nightly.yml --ref sos …`
+  (`gh repo set-default jbfelix/rustdesk` fait). Preuve attendue : 8 assets, opérateur 1.5.0-8 installé à la main
+  puis auto-mise à jour au run suivant (Mac surtout).
