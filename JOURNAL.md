@@ -134,3 +134,9 @@ pré-version `nightly` polluée et le secret SOS_PRESET_PASSWORD ; retirer les a
   signed dmg » vert sur aarch64 avec le secret APPLE_APP_PASSWORD régénéré par JB (le profil notarytool « rops »
   du Mac, lui, n'avait jamais cessé de marcher : c'était bien le secret GitHub, pas le compte Apple).
   Nettoyage fait : release + tag `nightly` supprimés, secret SOS_PRESET_PASSWORD supprimé.
+
+## 2026-09-29 (18:00) — mise à jour automatique de l'opérateur
+**Décidé (JB)** : l'opérateur se met à jour tout seul comme le client. Depuis 1.5.0-6 la release publie les deux
+éditions (`sos-<tag>-…` et `sos-client-<tag>-…`) : `release_file_prefix()` choisit selon l'édition, `update_source()`
+n'exclut plus que l'édition Actibel (Intune maître). Non compilé ici (pas de cargo) : le prochain run le prouvera ;
+**à tester sur le MacBook de JB** (mise à jour root macOS jamais vue tourner) et sur un poste opérateur Windows.
