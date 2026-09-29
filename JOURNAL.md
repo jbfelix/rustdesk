@@ -152,3 +152,6 @@ n'exclut plus que l'édition Actibel (Intune maître). Non compilé ici (pas de 
   (le bug du 22/9, reconstruit). Corrigé : préfixe opérateur = `sos-operator`, publication client ET opérateur
   (jamais actibel), alias retiré. À produire : release **1.5.0-9** (2 runs) ; opérateur à réinstaller depuis
   `sos-operator-1.5.0-9-…`. Windows : même chose (1.5.0-6 opérateur venait d'un artefact, jamais de la release).
+- **20:55** : release 1.5.0-9 complète (8 assets, `sos-operator-…` + `sos-client-…`). Rouge à côté : « Flutter Tag
+  Build » (amont) se déclenche sur tout tag `x.y.z-n` et rebâtit avec les entrées par défaut → échec codesign macOS,
+  risque d'écrasement des assets. Déclencheur sur tag retiré (workflow_dispatch seul).

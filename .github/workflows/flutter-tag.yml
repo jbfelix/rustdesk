@@ -1,13 +1,11 @@
 name: Flutter Tag Build
 
+# SOS : le déclenchement sur tag est retiré (29/9). La release est produite par « Flutter Nightly Build »
+# (deux runs : opérateur et client, `gh workflow run flutter-nightly.yml --ref sos …`) ; le tag qu'elle crée
+# relançait ce workflow amont avec les entrées par défaut, qui plantait à la signature macOS et pouvait
+# écraser les assets. Lancement manuel seulement.
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-      - '[0-9]+.[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+-[0-9]+'
-      - '[0-9]+.[0-9]+.[0-9]+-[0-9]+'
 
 jobs:
   run-flutter-tag-build:
