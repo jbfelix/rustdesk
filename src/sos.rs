@@ -12,19 +12,22 @@ pub const EDITION: &str = "__SOS_EDITION__";
 pub const BUILD: &str = "__SOS_BUILD__";
 /// Dépôt dont les releases servent de source de mise à jour.
 pub const UPDATE_REPO: &str = "jbfelix/rustdesk";
-/// Préfixe des assets de release : sos-client-<étiquette>-<arch>.<dmg|exe> (workflow SOS_KIND).
-pub const RELEASE_FILE_PREFIX: &str = "sos-client";
+/// Préfixe des assets de release selon l'édition (workflow SOS_KIND) :
+/// client → sos-client-<étiquette>-<arch>.<dmg|exe>, opérateur → sos-<étiquette>-<arch>.<dmg|exe>.
+pub fn release_file_prefix() -> &'static str {
+    if INCOMING_ONLY == "Y" { "sos-client" } else { "sos" }
+}
 
 /// Étiquette de build si elle a été gravée (sinon None : pas de mise à jour automatique).
 pub fn build() -> Option<&'static str> {
     if BUILD.is_empty() || is_placeholder(BUILD) { None } else { Some(BUILD) }
 }
 
-/// Source de mise à jour utilisable ? Seulement pour le client des proches : la release ne
-/// publie que ce client, un opérateur qui s'y mettrait à jour deviendrait « entrant seul »
-/// (constaté le 22/9 sur le MacBook). L'opérateur se met à jour à la main (artefact du run).
+/// Source de mise à jour utilisable ? Client et opérateur (depuis 1.5.0-6 la release publie les
+/// deux, chacun sous son préfixe — avant, un opérateur mis à jour devenait « entrant seul »,
+/// constaté le 22/9 sur le MacBook). Jamais l'édition Actibel : Intune est maître.
 pub fn update_source() -> Option<&'static str> {
-    if INCOMING_ONLY == "Y" && !is_actibel() { build() } else { None }
+    if !is_actibel() { build() } else { None }
 }
 
 /// Édition Actibel : postes gérés par Intune, montées de version par MSI, jamais par l'updater.

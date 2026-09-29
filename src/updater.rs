@@ -208,7 +208,7 @@ fn check_update(manually: bool) -> ResultType<()> {
                 "{}/{}-{}-{}.{}",
                 download_url,
                 if crate::sos::update_source().is_some() {
-                    crate::sos::RELEASE_FILE_PREFIX.to_owned()
+                    crate::sos::release_file_prefix().to_owned()
                 } else {
                     crate::get_app_name().to_lowercase()
                 },
@@ -600,7 +600,7 @@ pub fn check_update_as_root() -> ResultType<bool> {
         "{}/{}-{}-{}.dmg",
         download_url,
         if crate::sos::update_source().is_some() {
-            crate::sos::RELEASE_FILE_PREFIX.to_owned()
+            crate::sos::release_file_prefix().to_owned()
         } else {
             crate::get_app_name().to_lowercase()
         },
