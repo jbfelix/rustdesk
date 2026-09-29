@@ -417,20 +417,18 @@ jobs:
           name: sos-${{ env.SOS_KIND }}-windows-${{ matrix.job.arch }}-installeur
           path: sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.exe
 
-      - name: SOS — alias ancien nom (transition, clients ≤ 1.5.0-5 ; à retirer après 1.5.0-6)
-        if: env.UPLOAD_ARTIFACT == 'true' && env.SOS_ROLE == 'proches'
-        shell: bash
-        run: cp sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.exe sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.exe
-
+      # Client ET opérateur vont dans la release (chacun sous son préfixe : l'updater de chaque édition
+      # cherche le sien). Jamais l'édition Actibel (artefacts seulement, Intune est maître).
+      # L'alias « sos-<tag> » (ancien nom du client, transition ≤ 1.5.0-5) est retiré depuis 1.5.0-9 :
+      # il se faisait passer pour l'opérateur (29/9).
       - name: SOS — Publish installer to release
-        if: env.UPLOAD_ARTIFACT == 'true' && env.SOS_ROLE == 'proches'
+        if: env.UPLOAD_ARTIFACT == 'true' && env.SOS_ROLE != 'actibel'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
           prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.exe
-            sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.exe
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
@@ -1012,19 +1010,14 @@ jobs:
           name: sos-${{ env.SOS_KIND }}-macos-${{ matrix.job.arch }}
           path: sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.dmg
 
-      - name: SOS — alias ancien nom (transition, clients ≤ 1.5.0-5 ; à retirer après 1.5.0-6)
-        if: env.UPLOAD_ARTIFACT == 'true' && env.SOS_ROLE == 'proches'
-        run: cp sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.dmg sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.dmg
-
       - name: SOS — Publish DMG to release
-        if: env.UPLOAD_ARTIFACT == 'true' && env.SOS_ROLE == 'proches'
+        if: env.UPLOAD_ARTIFACT == 'true' && env.SOS_ROLE != 'actibel'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
           prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
             sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.dmg
-            sos-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.dmg
 
   publish_unsigned:
     needs:

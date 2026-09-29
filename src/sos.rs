@@ -13,9 +13,10 @@ pub const BUILD: &str = "__SOS_BUILD__";
 /// Dépôt dont les releases servent de source de mise à jour.
 pub const UPDATE_REPO: &str = "jbfelix/rustdesk";
 /// Préfixe des assets de release selon l'édition (workflow SOS_KIND) :
-/// client → sos-client-<étiquette>-<arch>.<dmg|exe>, opérateur → sos-<étiquette>-<arch>.<dmg|exe>.
+/// client → sos-client-<étiquette>-<arch>.<dmg|exe>, opérateur → sos-operator-<étiquette>-<arch>.<dmg|exe>.
+/// Jamais « sos-<étiquette> » nu : c'était l'alias de l'ancien nom du client (piège du 29/9).
 pub fn release_file_prefix() -> &'static str {
-    if INCOMING_ONLY == "Y" { "sos-client" } else { "sos" }
+    if INCOMING_ONLY == "Y" { "sos-client" } else { "sos-operator" }
 }
 
 /// Étiquette de build si elle a été gravée (sinon None : pas de mise à jour automatique).

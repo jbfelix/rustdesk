@@ -145,3 +145,10 @@ n'exclut plus que l'édition Actibel (Intune maître). Non compilé ici (pas de 
   annulé, release et tag supprimés. Désormais lancer par `gh workflow run flutter-nightly.yml --ref sos …`
   (`gh repo set-default jbfelix/rustdesk` fait). Preuve attendue : 8 assets, opérateur 1.5.0-8 installé à la main
   puis auto-mise à jour au run suivant (Mac surtout).
+- **19:35 — INCIDENT (mon erreur)** : « sos-<tag>-… » dans les releases n'a jamais été l'opérateur : c'est l'alias
+  ancien nom du **client** (étape de transition ≤ 1.5.0-5), et l'opérateur n'était pas publié du tout
+  (`if: SOS_ROLE == 'proches'`). Conséquences : page Apps ayant listé 4 clients comme « Opérateur », JB a installé
+  un client sur son Mac ; `release_file_prefix()` → "sos" aurait fait télécharger un client à l'auto-mise à jour
+  (le bug du 22/9, reconstruit). Corrigé : préfixe opérateur = `sos-operator`, publication client ET opérateur
+  (jamais actibel), alias retiré. À produire : release **1.5.0-9** (2 runs) ; opérateur à réinstaller depuis
+  `sos-operator-1.5.0-9-…`. Windows : même chose (1.5.0-6 opérateur venait d'un artefact, jamais de la release).
