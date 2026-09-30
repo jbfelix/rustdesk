@@ -1081,7 +1081,9 @@ jobs:
           files: rustdesk-${{ env.VERSION }}-unsigned.tar.gz
 
   build-rustdesk-android:
-    if: false  # SOS : hors périmètre
+    # SOS (30/9) : Android réactivé, arm64 seulement (tout téléphone/tablette depuis ~2016) ; APK signé avec la clé
+    # SOS (secrets ANDROID_*), nommé sos-<kind>-<tag>-aarch64.apk, publié en release (client/opérateur) ou en
+    # artefact (actibel). Sans clé de signature, le job échoue : jamais d'APK non signé.
     needs: [generate-bridge]
     name: build rustdesk android apk ${{ matrix.job.target }}
     runs-on: ${{ matrix.job.os }}
@@ -1092,20 +1094,6 @@ jobs:
           - {
               arch: aarch64,
               target: aarch64-linux-android,
-              os: ubuntu-24.04,
-              reltype: release,
-              suffix: "",
-            }
-          - {
-              arch: armv7,
-              target: armv7-linux-androideabi,
-              os: ubuntu-24.04,
-              reltype: release,
-              suffix: "",
-            }
-          - {
-              arch: x86_64,
-              target: x86_64-linux-android,
               os: ubuntu-24.04,
               reltype: release,
               suffix: "",
@@ -1167,6 +1155,45 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           submodules: recursive
+
+      - name: SOS — graver serveur, clé et nom dans hbb_common
+        shell: bash
+        run: |
+          f=libs/hbb_common/src/config.rs
+          sed -i.bak \
+            -e 's#RwLock::new("RustDesk".to_owned())#RwLock::new("SOS".to_owned())#' \
+            -e 's#&\["rs-ny.rustdesk.com"\]#\&["'"$SOS_SERVEUR"'"]#' \
+            -e 's#OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=#x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=#' "$f"
+          rm -f "$f.bak"
+          grep -n 'APP_NAME: RwLock\|RENDEZVOUS_SERVERS: &\|pub const RS_PUB_KEY' "$f"
+          grep -q '"SOS".to_owned' "$f" && grep -q "$SOS_SERVEUR" "$f" && grep -q 'x9oMe0AakqFdAj8ArJ4aWqYemFQIZgLf0TNOjoTQ0fU=' "$f"
+          python3 - <<'PY'
+          import os
+          p='src/sos.rs'; s=open(p, encoding='utf-8').read()
+          s=s.replace('__SOS_INCOMING_ONLY__', os.environ.get('SOS_INCOMING_ONLY','N'))
+          s=s.replace('__SOS_EDITION__', os.environ.get('SOS_ROLE','operateur'))
+          tag=os.environ.get('TAG_NAME','nightly')
+          if tag and tag!='nightly': s=s.replace('__SOS_BUILD__', tag)
+          print('sos.rs: build =', tag)
+          open(p,'w', encoding='utf-8').write(s)
+          print('sos.rs: entrant seulement =', os.environ.get('SOS_INCOMING_ONLY'))
+          PY
+
+      - name: SOS — nom, identifiant et icône Android
+        shell: bash
+        run: |
+          set -e
+          m=flutter/android/app/src/main/AndroidManifest.xml
+          sed -i 's#android:label="RustDesk Input"#android:label="SOS saisie"#; s#android:label="RustDesk"#android:label="SOS"#' "$m"
+          sed -i 's#<string name="app_name">RustDesk</string>#<string name="app_name">SOS</string>#' flutter/android/app/src/main/res/values/strings.xml
+          sed -i 's#applicationId "com.carriez.flutter_hbb"#applicationId "be.actibel.sos"#' flutter/android/app/build.gradle
+          grep -q 'be.actibel.sos' flutter/android/app/build.gradle && grep -q 'android:label="SOS"' "$m"
+          # Icône : les PNG SOS remplacent ceux de RustDesk (l'icône adaptative XML est retirée, sinon elle prime)
+          for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            convert res/icon.png -resize ${d#*:}x${d#*:} flutter/android/app/src/main/res/mipmap-${d%%:*}/ic_launcher.png
+          done
+          rm -f flutter/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          ls -la flutter/android/app/src/main/res/mipmap-xxxhdpi/
 
       - name: Install flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -1349,30 +1376,28 @@ jobs:
           # env.ANDROID_SIGN_TOOL_VERSION is set by Step "Setup sign tool version variable"
           BUILD_TOOLS_VERSION: ${{ env.ANDROID_SIGN_TOOL_VERSION }}
 
-      - name: Upload Artifacts
-        if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
+      - name: SOS — APK signé nommé sos-<kind>-<tag>-<arch>.apk
+        shell: bash
+        run: |
+          test -n "${{ steps.sign-rustdesk.outputs.signedReleaseFile }}" || { echo "APK non signé : secrets ANDROID_* absents"; exit 1; }
+          cp "${{ steps.sign-rustdesk.outputs.signedReleaseFile }}" sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.apk
+          ls -la sos-*.apk
+
+      - name: SOS — Upload apk
+        if: env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
-          path: ${{steps.sign-rustdesk.outputs.signedReleaseFile}}
+          name: sos-${{ env.SOS_KIND }}-android-${{ matrix.job.arch }}
+          path: sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.apk
 
-      - name: Publish signed apk package
-        if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
+      - name: SOS — Publish apk to release
+        if: env.UPLOAD_ARTIFACT == 'true' && env.SOS_ROLE != 'actibel'
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
           prerelease: ${{ env.TAG_NAME == 'nightly' }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            ${{steps.sign-rustdesk.outputs.signedReleaseFile}}
-
-      - name: Publish unsigned apk package
-        if: env.ANDROID_SIGNING_KEY == null && env.UPLOAD_ARTIFACT == 'true'
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
-        with:
-          prerelease: ${{ env.TAG_NAME == 'nightly' }}
-          tag_name: ${{ env.TAG_NAME }}
-          files: |
-            signed-apk/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
+            sos-${{ env.SOS_KIND }}-${{ env.TAG_NAME }}-${{ matrix.job.arch }}.apk
 
   build-rustdesk-android-universal:
     needs: [build-rustdesk-android]

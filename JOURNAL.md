@@ -155,3 +155,15 @@ n'exclut plus que l'édition Actibel (Intune maître). Non compilé ici (pas de 
 - **20:55** : release 1.5.0-9 complète (8 assets, `sos-operator-…` + `sos-client-…`). Rouge à côté : « Flutter Tag
   Build » (amont) se déclenche sur tout tag `x.y.z-n` et rebâtit avec les entrées par défaut → échec codesign macOS,
   risque d'écrasement des assets. Déclencheur sur tag retiré (workflow_dispatch seul).
+
+## 2026-09-30 — Android
+**Fait** : job `build-rustdesk-android` réactivé (arm64 seul), gravure SOS (serveur/clé/nom + sos.rs) ajoutée au job,
+étape « nom, identifiant et icône Android » : label SOS / « SOS saisie », `applicationId be.actibel.sos` (le nom de
+paquet RustDesk est pris sur Play ; le namespace Kotlin reste com.carriez.flutter_hbb, rien d'autre n'y fait référence),
+icônes `res/icon.png` redimensionnées (ImageMagick du runner), icône adaptative XML retirée. APK signé par les secrets
+ANDROID_SIGNING_KEY / ANDROID_ALIAS / ANDROID_KEY_STORE_PASSWORD / ANDROID_KEY_PASSWORD (sinon le job échoue :
+jamais d'APK non signé), nommé `sos-<kind>-<tag>-aarch64.apk`, publié en release (client/opérateur) ou artefact
+(actibel). Édition client sur mobile = `isIncomingOnly` → pas d'onglet « Connexion », partage d'écran seul (vérifié
+dans flutter/lib/mobile/pages/home_page.dart). **Non compilé ici** : premier run à surveiller (vcpkg android, NDK r28c).
+**Ouvert** : clé de signature (JB), runs 1.5.0-10, test sur appareil ; la clé .jks est à garder précieusement (perdue =
+impossible de mettre à jour les apps installées).
