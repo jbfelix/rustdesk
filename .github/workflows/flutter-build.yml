@@ -1188,12 +1188,11 @@ jobs:
           sed -i 's#<string name="app_name">RustDesk</string>#<string name="app_name">SOS</string>#' flutter/android/app/src/main/res/values/strings.xml
           sed -i 's#applicationId "com.carriez.flutter_hbb"#applicationId "be.actibel.sos"#' flutter/android/app/build.gradle
           grep -q 'be.actibel.sos' flutter/android/app/build.gradle && grep -q 'android:label="SOS"' "$m"
-          # Icône : les PNG SOS remplacent ceux de RustDesk (l'icône adaptative XML est retirée, sinon elle prime)
-          for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
-            convert res/icon.png -resize ${d#*:}x${d#*:} flutter/android/app/src/main/res/mipmap-${d%%:*}/ic_launcher.png
-          done
-          rm -f flutter/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
-          ls -la flutter/android/app/src/main/res/mipmap-xxxhdpi/
+          # Icônes : les PNG SOS sont versionnés dans le fork (mipmap-*/ic_launcher.png, générés depuis res/icon.png ;
+          # l'icône adaptative XML de mipmap-anydpi-v26 est retirée, sinon elle primerait). Pas d'ImageMagick sur
+          # les runners ubuntu-24.04 (exit 127 le 30/9).
+          test -f flutter/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          test ! -e flutter/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
 
       - name: Install flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2

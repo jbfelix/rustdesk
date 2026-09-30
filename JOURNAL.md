@@ -167,3 +167,6 @@ jamais d'APK non signé), nommé `sos-<kind>-<tag>-aarch64.apk`, publié en rele
 dans flutter/lib/mobile/pages/home_page.dart). **Non compilé ici** : premier run à surveiller (vcpkg android, NDK r28c).
 **Ouvert** : clé de signature (JB), runs 1.5.0-10, test sur appareil ; la clé .jks est à garder précieusement (perdue =
 impossible de mettre à jour les apps installées).
+- **15:10** : runs 38-40 rouges au job Android : `convert` absent des runners ubuntu-24.04 (exit 127). Icônes SOS
+  générées ici (48→192 px depuis res/icon.png) et **versionnées** dans mipmap-*/ic_launcher.png ; icône adaptative XML
+  (mipmap-anydpi-v26) retirée du dépôt. L'étape du workflow ne fait plus que vérifier. Relance 1.5.0-10.
