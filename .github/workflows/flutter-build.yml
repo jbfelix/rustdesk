@@ -1084,7 +1084,9 @@ jobs:
     # SOS (30/9) : Android réactivé, arm64 seulement (tout téléphone/tablette depuis ~2016) ; APK signé avec la clé
     # SOS (secrets ANDROID_*), nommé sos-<kind>-<tag>-aarch64.apk, publié en release (client/opérateur) ou en
     # artefact (actibel). Sans clé de signature, le job échoue : jamais d'APK non signé.
+    # SOS (1/10) : pas d'opérateur Android — un téléphone ne prend jamais la main ; client et Actibel seulement.
     needs: [generate-bridge]
+    if: ${{ inputs.sos-incoming-only || inputs.sos-serveur == 'sos.actibel.be' }}
     name: build rustdesk android apk ${{ matrix.job.target }}
     runs-on: ${{ matrix.job.os }}
     strategy:
