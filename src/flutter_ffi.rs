@@ -51,6 +51,9 @@ fn initialize(app_dir: &str, custom_client_config: &str) {
     } else {
         crate::read_custom_client(custom_client_config);
     }
+    // SOS : sur mobile, c'est ici que l'app démarre (pas core_main) — sans cet appel, l'édition client
+    // se comportait en opérateur sur Android (constaté 1/10 sur le Galaxy d'Olivier). Idempotent sur desktop.
+    crate::sos::apply();
     #[cfg(target_os = "android")]
     {
         // flexi_logger can't work when android_logger initialized.

@@ -170,3 +170,10 @@ impossible de mettre à jour les apps installées).
 - **15:10** : runs 38-40 rouges au job Android : `convert` absent des runners ubuntu-24.04 (exit 127). Icônes SOS
   générées ici (48→192 px depuis res/icon.png) et **versionnées** dans mipmap-*/ic_launcher.png ; icône adaptative XML
   (mipmap-anydpi-v26) retirée du dépôt. L'étape du workflow ne fait plus que vérifier. Relance 1.5.0-10.
+
+## 2026-10-01 — Android : l'édition client se comportait en opérateur
+**Constaté (JB)** : sur le Galaxy d'Olivier, l'APK Actibel (entrant seul) montre l'interface opérateur.
+**Cause** : `sos::apply()` n'est appelé que dans `core_main` et `service.rs` ; sur Android/iOS l'app démarre par
+`flutter_ffi::initialize()` (main_init) → aucun réglage SOS appliqué (conn-type, vérification, masquages).
+**Fait** : `crate::sos::apply()` ajouté dans `initialize()` après le chargement du client custom (idempotent sur
+desktop). À rebâtir : 1.5.0-11 (actibel d'abord, puis client + opérateur pour les APK de la release).
