@@ -177,3 +177,6 @@ impossible de mettre à jour les apps installées).
 `flutter_ffi::initialize()` (main_init) → aucun réglage SOS appliqué (conn-type, vérification, masquages).
 **Fait** : `crate::sos::apply()` ajouté dans `initialize()` après le chargement du client custom (idempotent sur
 desktop). À rebâtir : 1.5.0-11 (actibel d'abord, puis client + opérateur pour les APK de la release).
+- **13:30** : Play géré refuse la mise à jour de l'app privée (« Cannot update a published APK ») : versionCode figé à
+  68 (`pubspec 1.5.0+68`) sur tous nos builds. Workflow : `--build-number` dérivé de l'étiquette (1.5.0-12 →
+  1050012, croissant ; nightly → 1) et `--build-name` = étiquette. Rebâtir 1.5.0-12 (3 runs).

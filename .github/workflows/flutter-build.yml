@@ -1318,7 +1318,12 @@ jobs:
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/arm64-v8a/librustdesk.so
               # build flutter
               pushd flutter
-              flutter build apk "--${{ matrix.job.reltype }}" --target-platform android-arm64 --split-per-abi
+              # SOS : versionCode dérivé de l'étiquette (1.5.0-11 → 1050011), strictement croissant d'une release à
+              # l'autre — Google Play (app privée) refuse un APK dont le versionCode n'augmente pas (1/10/2026).
+              # versionName = l'étiquette (visible dans Play et dans l'app). nightly → 1.5.0 + 0.
+              SOS_BN=$(python3 -c "import re,sys;t='${{ env.TAG_NAME }}';m=re.match(r'^(\d+)\.(\d+)\.(\d+)(?:-(\d+))?$',t);print(max(1,int(m[1])*1000000+int(m[2])*10000+int(m[3])*100+int(m[4] or 0)) if m else 1)")
+              echo "versionCode SOS = $SOS_BN"
+              flutter build apk "--${{ matrix.job.reltype }}" --target-platform android-arm64 --split-per-abi --build-number="$SOS_BN" --build-name="${{ env.TAG_NAME }}"
               mv build/app/outputs/flutter-apk/app-arm64-v8a-${{ matrix.job.reltype }}.apk ../rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.apk
             ;;
             armv7-linux-androideabi)
