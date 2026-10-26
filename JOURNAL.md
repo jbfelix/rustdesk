@@ -183,3 +183,10 @@ desktop). À rebâtir : 1.5.0-11 (actibel d'abord, puis client + opérateur pour
 
 ## 2026-10-01 — plus d'opérateur Android
 - Décidé (JB) : un téléphone ne prend jamais la main. Job `build-rustdesk-android` conditionné à `sos-incoming-only || sos-serveur == sos.actibel.be` ; les releases ne publient plus `sos-operator-*.apk`.
+
+## 2026-10-26 — Android client : démarrage au boot par défaut
+- Décidé (JB) : l'édition client Android démarre seule au boot, sans réglage sur l'appareil (tablettes iiyama d'ActiSigns).
+- Fait : flutter-build.yml, étape « SOS — nom, identifiant et icône Android » : si SOS_KIND=client, défaut de KEY_START_ON_BOOT_OPT passé à true (BootReceiver.kt + MainActivity.kt), contrôlé par grep. Édition Actibel inchangée.
+- Prérequis restants sur l'appareil (ADB, admin ActiSigns) : SYSTEM_ALERT_WINDOW, exclusion batterie, PROJECT_MEDIA (supprime le dialogue de capture), service d'accessibilité.
+- Piège : `am force-stop be.actibel.sos` retire SOS des services d'accessibilité activés (constaté sur 3 tablettes) — le réactiver ensuite.
+- Ouvert : pas encore de build. Une release client republie aussi les postes Windows/macOS (MAJ auto) : à lancer par JB.
