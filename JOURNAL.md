@@ -190,3 +190,8 @@ desktop). À rebâtir : 1.5.0-11 (actibel d'abord, puis client + opérateur pour
 - Prérequis restants sur l'appareil (ADB, admin ActiSigns) : SYSTEM_ALERT_WINDOW, exclusion batterie, PROJECT_MEDIA (supprime le dialogue de capture), service d'accessibilité.
 - Piège : `am force-stop be.actibel.sos` retire SOS des services d'accessibilité activés (constaté sur 3 tablettes) — le réactiver ensuite.
 - Ouvert : pas encore de build. Une release client republie aussi les postes Windows/macOS (MAJ auto) : à lancer par JB.
+
+## 2026-10-26 (16:30) — build 1.5.0-13 bloqué côté GitHub
+- Fait (accord JB) : workflow flutter-nightly.yml réactivé (`gh workflow enable`, il était « disabled_manually »).
+- Constaté : tout déclenchement (nightly, ci) renvoie HTTP 422 « Actions has been disabled for this repository » alors que l'API des permissions dit `enabled: true, allowed_actions: all` (dépôt public, fork de rustdesk/rustdesk). Blocage au niveau GitHub, pas dans les réglages : voir le bandeau sur https://github.com/jbfelix/rustdesk/actions.
+- Ouvert : lancer 1.5.0-13 (client, sos.jbfelix.be) dès que GitHub Actions est rétabli. Les 4 tablettes Popart ont déjà l'option cochée à la main, rien d'urgent.
