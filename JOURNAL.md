@@ -195,3 +195,8 @@ desktop). À rebâtir : 1.5.0-11 (actibel d'abord, puis client + opérateur pour
 - Fait (accord JB) : workflow flutter-nightly.yml réactivé (`gh workflow enable`, il était « disabled_manually »).
 - Constaté : tout déclenchement (nightly, ci) renvoie HTTP 422 « Actions has been disabled for this repository » alors que l'API des permissions dit `enabled: true, allowed_actions: all` (dépôt public, fork de rustdesk/rustdesk). Blocage au niveau GitHub, pas dans les réglages : voir le bandeau sur https://github.com/jbfelix/rustdesk/actions.
 - Ouvert : lancer 1.5.0-13 (client, sos.jbfelix.be) dès que GitHub Actions est rétabli. Les 4 tablettes Popart ont déjà l'option cochée à la main, rien d'urgent.
+
+## 2026-10-26 (16:40) — dépôt public : risques revus
+- Constaté : aucun secret dans le code ni l'historique (clés de signature dans les Secrets GitHub). Serveur relais : hbbs et hbbr tournent avec `-k _` (ps sur le VPS node, en marche depuis 6 j 18 h) → seules les applications portant la clé du serveur peuvent l'utiliser, même avec l'opérateur téléchargé depuis les releases.
+- Décidé (JB) : le dépôt reste public pour l'instant. Passage en privé possible plus tard : servir d'abord les mises à jour depuis notre serveur (les clients lisent les releases GitHub sans authentification), puis runner sur le Mac (minutes macOS payantes en privé), AGPL → source à fournir aux utilisateurs.
+- GitHub avait suspendu les workflows du fork (« scale of GitHub Actions usage ») ; réactivés par JB le 26/10. Build 1.5.0-13 client lancé (run 40350074976).
