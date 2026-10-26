@@ -1195,6 +1195,15 @@ jobs:
           # les runners ubuntu-24.04 (exit 127 le 30/9).
           test -f flutter/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
           test ! -e flutter/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          # Édition client (26/10, tablettes iiyama ActiSigns) : « démarrer au démarrage » coché par défaut, pour
+          # qu'un appareil neuf n'exige aucune manipulation. Le service ne part au boot que si SYSTEM_ALERT_WINDOW
+          # et l'exclusion d'économie de batterie sont accordés (posés par ADB depuis l'admin ActiSigns, avec
+          # PROJECT_MEDIA qui supprime le dialogue de capture). Édition Actibel inchangée.
+          if [ "$SOS_KIND" = client ]; then
+            k=flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb
+            sed -i 's/getBoolean(KEY_START_ON_BOOT_OPT, false)/getBoolean(KEY_START_ON_BOOT_OPT, true)/' "$k/BootReceiver.kt" "$k/MainActivity.kt"
+            test "$(grep -c 'getBoolean(KEY_START_ON_BOOT_OPT, true)' "$k/BootReceiver.kt" "$k/MainActivity.kt" | awk -F: '{s+=$2} END {print s}')" = 2
+          fi
 
       - name: Install flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
