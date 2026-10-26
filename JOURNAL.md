@@ -198,5 +198,5 @@ desktop). À rebâtir : 1.5.0-11 (actibel d'abord, puis client + opérateur pour
 
 ## 2026-10-26 (16:40) — dépôt public : risques revus
 - Constaté : aucun secret dans le code ni l'historique (clés de signature dans les Secrets GitHub). Serveur relais : hbbs et hbbr tournent avec `-k _` (ps sur le VPS node, en marche depuis 6 j 18 h) → seules les applications portant la clé du serveur peuvent l'utiliser, même avec l'opérateur téléchargé depuis les releases.
-- Décidé (JB) : le dépôt reste public pour l'instant. Passage en privé possible plus tard : servir d'abord les mises à jour depuis notre serveur (les clients lisent les releases GitHub sans authentification), puis runner sur le Mac (minutes macOS payantes en privé), AGPL → source à fournir aux utilisateurs.
+- Recommandé : rester public (décision de JB en attente). Passage en privé possible plus tard : servir d'abord les mises à jour depuis notre serveur (les clients lisent les releases GitHub sans authentification), puis runner sur le Mac (minutes macOS payantes en privé), AGPL → source à fournir aux utilisateurs.
 - GitHub avait suspendu les workflows du fork (« scale of GitHub Actions usage ») ; réactivés par JB le 26/10. Build 1.5.0-13 client lancé (run 40350074976).
