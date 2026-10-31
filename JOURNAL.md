@@ -200,3 +200,10 @@ desktop). À rebâtir : 1.5.0-11 (actibel d'abord, puis client + opérateur pour
 - Constaté : aucun secret dans le code ni l'historique (clés de signature dans les Secrets GitHub). Serveur relais : hbbs et hbbr tournent avec `-k _` (ps sur le VPS node, en marche depuis 6 j 18 h) → seules les applications portant la clé du serveur peuvent l'utiliser, même avec l'opérateur téléchargé depuis les releases.
 - Recommandé : rester public (décision de JB en attente). Passage en privé possible plus tard : servir d'abord les mises à jour depuis notre serveur (les clients lisent les releases GitHub sans authentification), puis runner sur le Mac (minutes macOS payantes en privé), AGPL → source à fournir aux utilisateurs.
 - GitHub avait suspendu les workflows du fork (« scale of GitHub Actions usage ») ; réactivés par JB le 26/10. Build 1.5.0-13 client lancé (run 40350074976).
+
+## 31/10/2026 — retrait du runner macOS 14 par GitHub (2/11/2026)
+- Fait : flutter-build.yml (branche sos), job aarch64-apple-darwin `macos-14` → `macos-15` (ee7c8e1). Job x86_64 déjà sur macos-15-intel, job iOS sur macos-latest.
+- Décidé : macos-15 épinglé plutôt que macos-latest (= macos-26, Xcode plus récent, risque de casser la chaîne Flutter/Rust).
+- Écarté : passer la branche par défaut sur sos (le nightly tournerait alors sur le vrai code et publierait sur le dépôt public). Le nightly reste disabled_manually ; master garde macos-14 sans conséquence.
+- Laissé tel quel : playground.yml (macos-14 seulement en commentaire, jobs encore sur macos-13 retiré, lancement manuel uniquement).
+- Reste ouvert : constater le premier build macOS arm64 vert sur macos-15.
